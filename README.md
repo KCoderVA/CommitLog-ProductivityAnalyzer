@@ -1,13 +1,26 @@
 # Git/GitHub Commit Log Productivity Analyzer
 
-A comprehensive, unified dashboard for analyzing Git repository commit logs and extracting detailed productivity metrics from both local repositories and GitHub.com repositories.
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Version](https://img.shields.io/badge/Version-0.1.12-green.svg)](./CHANGELOG.md)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Demo-brightgreen.svg)](https://kcoderva.github.io/CommitLog-ProductivityAnalyzer/)
+[![Repository](https://img.shields.io/badge/GitHub-Repository-black.svg)](https://github.com/KCoderVA/CommitLog-ProductivityAnalyzer)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-yellow.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![HTML5](https://img.shields.io/badge/HTML5-E34F26.svg?logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
+[![CSS3](https://img.shields.io/badge/CSS3-1572B6.svg?logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
 
-## 🎯 Project Overview
-
-This project provides a single, intelligent HTML dashboard that automatically adapts to its environment (offline/online) and delivers powerful repository analysis capabilities. Extract insights from commit logs, analyze productivity patterns, and visualize development metrics through an intuitive interface.
+A comprehensive, unified dashboard for analyzing Git repository commit logs and extracting detailed productivity metrics from both local repositories and GitHub.com repositories. This project provides a single, intelligent HTML dashboard that automatically adapts to its environment (offline/online) and delivers powerful repository analysis capabilities. Extract insights from commit logs, analyze productivity patterns, and visualize development metrics through an intuitive interface.
 
 ## ✨ Key Features
 
+### 🎨 **Interactive Dashboard**
+- Real-time data visualization with charts and graphs
+- GitHub.com hosted index.html file (via https://kcoderva.github.io/CommitLog-ProductivityAnalyzer/)
+- Responsive design for all devices 
+- Three main analysis sections:
+  - **Repository Summary**: High-level overview and statistics
+  - **Detailed History**: Comprehensive commit timeline
+  - **Productivity Metrics**: In-depth analysis and trends
+  - 
 ### 🔍 **Repository Analysis**
 - **Local Git Repositories**: Direct analysis of local `.git` folders (offline mode)
 - **GitHub Repositories**: Remote analysis via GitHub API (online/offline modes)
@@ -21,13 +34,7 @@ This project provides a single, intelligent HTML dashboard that automatically ad
 - Time-based activity patterns
 - Repository growth tracking
 
-### 🎨 **Interactive Dashboard**
-- Real-time data visualization with charts and graphs
-- Responsive design for all devices
-- Three main analysis sections:
-  - **Repository Summary**: High-level overview and statistics
-  - **Detailed History**: Comprehensive commit timeline
-  - **Productivity Metrics**: In-depth analysis and trends
+
 
 ### 🌐 **Deployment Flexibility**
 - **Unified Entry Point**: Single `index.html` for all environments

@@ -8,21 +8,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Apache License 2.0 headers to all source code files
-- LICENSE file with full Apache 2.0 license text
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [0.1.12] - 2025-07-17
+
+### Added
+- Professional README badge buttons (License, Version, GitHub Pages, Repository, Tech Stack)
+- Comprehensive temporary files policy in .gitignore
+- Development guidelines document (docs/development-guidelines.md)
 - GitHub repository configuration and GitHub Pages support
 - Updated online configuration with correct GitHub Pages URL
+- Branch migration from master to main for GitHub Pages compatibility
 
 ### Changed
 - Project license from MIT to Apache License 2.0
-- Updated README.md with Apache 2.0 license information
+- Updated README.md with comprehensive improvements and professional badges
 - Added copyright notices to all major source files
 - Configured for GitHub Pages deployment at https://kcoderva.github.io/CommitLog-ProductivityAnalyzer/
+- Local repository branch renamed from master to main
+- Version numbering corrected to reflect development stage (0.1.12)
 
-### Deprecated
 ### Removed
 - `Commit_Productivity_Dashboard.html` - Removed obsolete offline-specific HTML file in favor of unified `index.html` approach
+
 ### Fixed
+- GitHub Pages configuration alignment with repository settings
+- Branch consistency between local and remote repositories
 ### Security
 
 ## [0.1.0] - 2025-07-17
@@ -89,7 +104,8 @@ Each version entry includes:
 - **Security** - Vulnerability fixes
 
 ### Release Links
-[Unreleased]: https://github.com/KCoderVA/CommitLog-ProductivityAnalyzer/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/KCoderVA/CommitLog-ProductivityAnalyzer/compare/v0.1.12...HEAD
+[0.1.12]: https://github.com/KCoderVA/CommitLog-ProductivityAnalyzer/compare/v0.1.0...v0.1.12
 [0.1.0]: https://github.com/KCoderVA/CommitLog-ProductivityAnalyzer/releases/tag/v0.1.0
 
 ---
