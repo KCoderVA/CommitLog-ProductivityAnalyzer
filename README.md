@@ -146,6 +146,7 @@ The `index.html` file is the single entry point that automatically detects its e
 - **Semantic Versioning**: Follow SemVer for version updates
 - **Conventional Commits**: Use standardized commit message format
 - **Responsive Design**: Ensure mobile compatibility for UI changes
+- **Temporary Files Policy**: Always add temporary development files to .gitignore (see [Development Guidelines](docs/development-guidelines.md))
 
 ### Project Development Tools
 - **VS Code Workspace**: Pre-configured development environment
