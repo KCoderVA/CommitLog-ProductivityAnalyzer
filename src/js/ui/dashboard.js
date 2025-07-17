@@ -21,10 +21,11 @@
 
 class Dashboard {
     constructor() {
-        this.gitAnalyzer = new GitAnalyzer();
-        this.githubAPI = new GitHubAPI();
-        this.dataProcessor = new DataProcessor();
-        this.charts = new Charts();
+        // Initialize properties without creating instances yet
+        this.gitAnalyzer = null;
+        this.githubAPI = null;
+        this.dataProcessor = null;
+        this.charts = null;
         this.currentData = null;
         this.isAnalyzing = false;
     }
@@ -34,6 +35,25 @@ class Dashboard {
      */
     initialize() {
         console.log('Initializing Dashboard...');
+        
+        // Initialize dependencies now that all scripts should be loaded
+        try {
+            this.gitAnalyzer = window.GitAnalyzer ? new GitAnalyzer() : null;
+            this.githubAPI = window.GitHubAPI ? new GitHubAPI() : null;
+            this.dataProcessor = window.DataProcessor ? new DataProcessor() : null;
+            this.charts = window.Charts ? new Charts() : null;
+            
+            console.log('Dashboard dependencies initialized:', {
+                gitAnalyzer: !!this.gitAnalyzer,
+                githubAPI: !!this.githubAPI,
+                dataProcessor: !!this.dataProcessor,
+                charts: !!this.charts,
+                fileHandler: !!window.FileHandler
+            });
+        } catch (error) {
+            console.error('Error initializing dashboard dependencies:', error);
+        }
+        
         this.setupEventListeners();
         this.setupUI();
         this.loadConfiguration();
@@ -152,13 +172,30 @@ class Dashboard {
 
             // Process the data using GitAnalyzer if available
             let processedData;
-            if (window.GitAnalyzer) {
-                const gitAnalyzer = new GitAnalyzer();
-                const analysisResult = await gitAnalyzer.analyzeRepository(repositoryData.path);
-                processedData = this.dataProcessor.processCommitData(analysisResult.commits, repositoryData);
-            } else {
+            if (this.gitAnalyzer) {
+                const analysisResult = await this.gitAnalyzer.analyzeRepository(repositoryData.path);
+                processedData = this.dataProcessor ? this.dataProcessor.processCommitData(analysisResult.commits, repositoryData) : repositoryData;
+            } else if (this.dataProcessor) {
                 // Fallback to direct processing
                 processedData = this.dataProcessor.processCommitData(repositoryData.commits, repositoryData);
+            } else {
+                // Minimal processing if DataProcessor not available
+                processedData = {
+                    repository: repositoryData,
+                    commits: repositoryData.commits || [],
+                    summary: {
+                        totalCommits: (repositoryData.commits || []).length,
+                        contributors: 1,
+                        totalFiles: 0,
+                        totalAdditions: 0,
+                        totalDeletions: 0,
+                        netChanges: 0,
+                        averageCommitSize: 0,
+                        productivity: 'N/A',
+                        dateRange: { startFormatted: 'N/A', endFormatted: 'N/A', days: 0 },
+                        commitFrequency: { daily: 0 }
+                    }
+                };
             }
 
             this.currentData = processedData;
@@ -206,6 +243,10 @@ class Dashboard {
             this.setAnalyzing(true);
             this.showStatus('Analyzing GitHub repository...');
             
+            if (!this.githubAPI) {
+                throw new Error('GitHub API not available. Please refresh the page.');
+            }
+            
             // Parse the repository URL
             const { owner, repo } = this.githubAPI.parseRepoURL(url);
             console.log(`Analyzing repository: ${owner}/${repo}`);
@@ -227,7 +268,9 @@ class Dashboard {
 
             // Process the data
             this.showStatus('Processing data...');
-            const processedData = this.dataProcessor.processCommitData(commits, repository);
+            const processedData = this.dataProcessor ? 
+                this.dataProcessor.processCommitData(commits, repository) : 
+                { repository, commits, summary: { totalCommits: commits.length } };
             this.currentData = processedData;
             
             // Display the results
@@ -376,6 +419,11 @@ class Dashboard {
      */
     displayCharts(data) {
         try {
+            if (!this.charts) {
+                console.warn('Charts module not available, skipping chart creation');
+                return;
+            }
+            
             // Create chart containers if they don't exist
             this.ensureChartContainers();
             
