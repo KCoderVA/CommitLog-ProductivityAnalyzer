@@ -360,59 +360,79 @@ class Dashboard {
         const summaryContent = document.getElementById('summary-content');
         if (!summaryContent) return;
 
+        // Calculate date-filtered metrics (initially same as all-time)
+        const filteredMetrics = this.dataProcessor ? 
+            this.dataProcessor.calculateDateFilteredMetrics(this.currentData?.commits || []) :
+            {
+                filteredCommits: summary.totalCommits,
+                filteredAdditions: summary.totalAdditions,
+                filteredDeletions: summary.totalDeletions,
+                filteredProductivity: summary.productivity
+            };
+
         summaryContent.innerHTML = `
             <div class="repository-info">
-                <h3>${repository.name || 'Repository'}</h3>
+                <h3>${repository.name || 'CommitLog_ProductivityDashboard'}</h3>
                 ${repository.description ? `<p class="repo-description">${repository.description}</p>` : ''}
                 ${repository.url ? `<p><a href="${repository.url}" target="_blank" class="repo-link">View on GitHub</a></p>` : ''}
             </div>
             
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-value">${summary.totalCommits.toLocaleString()}</div>
-                    <div class="metric-label">Total Commits</div>
+            <!-- First Row: Repository-wide Metrics (All Time) -->
+            <div class="metrics-section">
+                <h4>📊 Repository Overview (All Time)</h4>
+                <div class="metrics-grid">
+                    <div class="metric-card repository-metric">
+                        <div class="metric-value">${summary.totalCommits.toLocaleString()}</div>
+                        <div class="metric-label">Total Commits</div>
+                    </div>
+                    
+                    <div class="metric-card repository-metric">
+                        <div class="metric-value">${summary.repositorySize.value}${summary.repositorySize.unit}</div>
+                        <div class="metric-label">Repository Size</div>
+                    </div>
+                    
+                    <div class="metric-card repository-metric">
+                        <div class="metric-value">${summary.totalFiles.toLocaleString()}</div>
+                        <div class="metric-label">Total Files/Objects</div>
+                    </div>
+                    
+                    <div class="metric-card repository-metric">
+                        <div class="metric-value">${summary.totalLinesOfCode.toLocaleString()}</div>
+                        <div class="metric-label">Total Lines of Code</div>
+                    </div>
                 </div>
-                
-                <div class="metric-card">
-                    <div class="metric-value">${summary.contributors}</div>
-                    <div class="metric-label">Contributors</div>
-                </div>
-                
-                <div class="metric-card">
-                    <div class="metric-value">${summary.totalFiles.toLocaleString()}</div>
-                    <div class="metric-label">Files Modified</div>
-                </div>
-                
-                <div class="metric-card">
-                    <div class="metric-value">+${summary.totalAdditions.toLocaleString()}</div>
-                    <div class="metric-label">Lines Added</div>
-                </div>
-                
-                <div class="metric-card">
-                    <div class="metric-value">-${summary.totalDeletions.toLocaleString()}</div>
-                    <div class="metric-label">Lines Deleted</div>
-                </div>
-                
-                <div class="metric-card">
-                    <div class="metric-value">${summary.netChanges >= 0 ? '+' : ''}${summary.netChanges.toLocaleString()}</div>
-                    <div class="metric-label">Net Changes</div>
-                </div>
-                
-                <div class="metric-card">
-                    <div class="metric-value">${summary.averageCommitSize}</div>
-                    <div class="metric-label">Avg Commit Size</div>
-                </div>
-                
-                <div class="metric-card">
-                    <div class="metric-value">${summary.productivity}</div>
-                    <div class="metric-label">Productivity Score</div>
+            </div>
+
+            <!-- Second Row: Date-filtered Metrics -->
+            <div class="metrics-section">
+                <h4>📅 Filtered Period Analysis</h4>
+                <div class="metrics-grid">
+                    <div class="metric-card filtered-metric">
+                        <div class="metric-value" id="filtered-commits">${filteredMetrics.filteredCommits.toLocaleString()}</div>
+                        <div class="metric-label">Commits in Period</div>
+                    </div>
+                    
+                    <div class="metric-card filtered-metric">
+                        <div class="metric-value" id="filtered-additions">+${filteredMetrics.filteredAdditions.toLocaleString()}</div>
+                        <div class="metric-label">Lines Added</div>
+                    </div>
+                    
+                    <div class="metric-card filtered-metric">
+                        <div class="metric-value" id="filtered-deletions">-${filteredMetrics.filteredDeletions.toLocaleString()}</div>
+                        <div class="metric-label">Lines Deleted</div>
+                    </div>
+                    
+                    <div class="metric-card filtered-metric">
+                        <div class="metric-value" id="filtered-productivity">${filteredMetrics.filteredProductivity}</div>
+                        <div class="metric-label">Productivity Score</div>
+                    </div>
                 </div>
             </div>
             
             <div class="date-range">
                 <h4>Analysis Period</h4>
-                <p>${summary.dateRange.startFormatted} - ${summary.dateRange.endFormatted}</p>
-                <p>${summary.dateRange.days} days | Avg ${summary.commitFrequency.daily} commits/day</p>
+                <p id="period-display">${summary.dateRange.startFormatted} - ${summary.dateRange.endFormatted}</p>
+                <p>${summary.dateRange.days} days | ${summary.contributors} contributor(s) | Avg ${summary.commitFrequency.daily} commits/day</p>
             </div>
         `;
     }
@@ -425,12 +445,13 @@ class Dashboard {
         const detailsContent = document.getElementById('commit-details');
         if (!detailsContent) return;
 
-        const commitsHtml = commits.slice(0, 50).map(commit => `
-            <div class="commit-item">
-                <div class="commit-header">
+        const commitsHtml = commits.slice(0, 50).map((commit, index) => `
+            <div class="commit-item" data-commit-index="${index}">
+                <div class="commit-header" onclick="this.parentElement.classList.toggle('expanded')">
                     <span class="commit-sha">${commit.shortSha}</span>
                     <span class="commit-author">${commit.author.name}</span>
                     <span class="commit-date">${commit.relativeDate}</span>
+                    <span class="expand-icon">▶</span>
                 </div>
                 <div class="commit-message">${commit.messagePreview}</div>
                 ${commit.stats ? `
@@ -440,12 +461,50 @@ class Dashboard {
                         <span class="files">${commit.stats.files?.length || 0} files</span>
                     </div>
                 ` : ''}
+                
+                <!-- Expandable commit details -->
+                <div class="commit-details-expanded">
+                    <div class="commit-full-message">
+                        <h5>Full Commit Message:</h5>
+                        <pre>${commit.message || commit.messagePreview}</pre>
+                    </div>
+                    
+                    <div class="commit-metadata">
+                        <div class="metadata-row">
+                            <strong>SHA:</strong> ${commit.sha || commit.shortSha}
+                        </div>
+                        <div class="metadata-row">
+                            <strong>Author:</strong> ${commit.author.name} &lt;${commit.author.email || 'unknown'}&gt;
+                        </div>
+                        <div class="metadata-row">
+                            <strong>Date:</strong> ${commit.absoluteDate || commit.relativeDate}
+                        </div>
+                        ${commit.stats ? `
+                            <div class="metadata-row">
+                                <strong>Changes:</strong> +${commit.stats.additions || 0} additions, -${commit.stats.deletions || 0} deletions
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    ${commit.stats?.files ? `
+                        <div class="commit-files">
+                            <h5>Modified Files:</h5>
+                            <ul>
+                                ${commit.stats.files.slice(0, 10).map(file => `
+                                    <li>${typeof file === 'string' ? file : (file.filename || file)}</li>
+                                `).join('')}
+                                ${commit.stats.files.length > 10 ? `<li><em>... and ${commit.stats.files.length - 10} more files</em></li>` : ''}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>
             </div>
         `).join('');
 
         detailsContent.innerHTML = `
             <div class="commits-header">
                 <h4>Recent Commits (${Math.min(commits.length, 50)} of ${commits.length})</h4>
+                <p class="commits-help">Click on any commit to view full details</p>
             </div>
             <div class="commits-list">
                 ${commitsHtml}
@@ -505,6 +564,53 @@ class Dashboard {
                 </div>
             `;
             summaryContent.appendChild(chartsContainer);
+        }
+    }
+
+    /**
+     * Updates the filtered metrics display based on date range
+     * @param {Date} startDate - Start date for filtering
+     * @param {Date} endDate - End date for filtering
+     */
+    updateFilteredMetrics(startDate = null, endDate = null) {
+        if (!this.currentData || !this.dataProcessor) return;
+
+        const filteredMetrics = this.dataProcessor.calculateDateFilteredMetrics(
+            this.currentData.commits || [], 
+            startDate, 
+            endDate
+        );
+
+        // Update the filtered metrics display
+        const filteredCommitsEl = document.getElementById('filtered-commits');
+        const filteredAdditionsEl = document.getElementById('filtered-additions');
+        const filteredDeletionsEl = document.getElementById('filtered-deletions');
+        const filteredProductivityEl = document.getElementById('filtered-productivity');
+        const periodDisplayEl = document.getElementById('period-display');
+
+        if (filteredCommitsEl) filteredCommitsEl.textContent = filteredMetrics.filteredCommits.toLocaleString();
+        if (filteredAdditionsEl) filteredAdditionsEl.textContent = `+${filteredMetrics.filteredAdditions.toLocaleString()}`;
+        if (filteredDeletionsEl) filteredDeletionsEl.textContent = `-${filteredMetrics.filteredDeletions.toLocaleString()}`;
+        if (filteredProductivityEl) filteredProductivityEl.textContent = filteredMetrics.filteredProductivity;
+
+        // Update period display
+        if (periodDisplayEl && startDate && endDate) {
+            const startFormatted = startDate.toLocaleDateString();
+            const endFormatted = endDate.toLocaleDateString();
+            periodDisplayEl.textContent = `${startFormatted} - ${endFormatted} (Filtered)`;
+        } else if (periodDisplayEl && this.currentData.summary) {
+            periodDisplayEl.textContent = `${this.currentData.summary.dateRange.startFormatted} - ${this.currentData.summary.dateRange.endFormatted} (All Time)`;
+        }
+
+        // Update filter status
+        const filterStatusEl = document.getElementById('filter-status-text');
+        if (filterStatusEl) {
+            if (startDate && endDate) {
+                const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+                filterStatusEl.textContent = `Showing ${filteredMetrics.filteredCommits} commits from ${days} day period`;
+            } else {
+                filterStatusEl.textContent = 'Showing all commits';
+            }
         }
     }
 
@@ -704,9 +810,11 @@ class Dashboard {
     applyDateFilter(startDate, endDate) {
         if (!this.originalData) return;
 
-        let filteredCommits = [...this.originalData.commits];
+        // Update the filtered metrics display without changing the original data
+        this.updateFilteredMetrics(startDate, endDate);
 
-        // Apply date filtering
+        // Filter commits for detailed history display
+        let filteredCommits = [...this.originalData.commits];
         if (startDate || endDate) {
             filteredCommits = filteredCommits.filter(commit => {
                 const commitDate = new Date(commit.date || commit.timestamp);
@@ -718,24 +826,24 @@ class Dashboard {
             });
         }
 
-        // Reprocess data with filtered commits
-        const filteredData = {
-            ...this.originalData,
-            commits: filteredCommits
-        };
-
-        // Recalculate summary with filtered data
+        // Update detailed history with filtered commits
         if (this.dataProcessor) {
-            filteredData.summary = this.dataProcessor.calculateSummary(filteredCommits, this.originalData.repository);
+            const formattedCommits = this.dataProcessor.formatCommitsForDisplay 
+                ? this.dataProcessor.formatCommitsForDisplay(filteredCommits)
+                : filteredCommits;
+            this.displayDetailedHistory(formattedCommits);
+        } else {
+            this.displayDetailedHistory(filteredCommits);
         }
-
-        this.currentData = filteredData;
 
         // Update status
         this.updateFilterStatus(startDate, endDate, filteredCommits.length);
 
-        // Refresh display
-        this.displayFilteredResults(filteredData);
+        // Show reset button if filters are active
+        const resetButton = document.getElementById('reset-filters');
+        if (resetButton) {
+            resetButton.style.display = (startDate || endDate) ? 'inline-block' : 'none';
+        }
     }
 
     /**

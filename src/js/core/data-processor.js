@@ -101,6 +101,12 @@ class DataProcessor {
         const commitFrequency = this.calculateCommitFrequency(commitDates, dateRange);
         const contributors = this.getUniqueContributors(commits);
         
+        // Estimate repository storage size (simplified calculation)
+        const estimatedRepoSize = this.estimateRepositorySize(totalAdditions, totalFiles.size);
+        
+        // Estimate total lines of code (current state)
+        const estimatedTotalLOC = Math.max(0, totalAdditions - totalDeletions);
+        
         return {
             totalCommits,
             totalAdditions,
@@ -111,7 +117,86 @@ class DataProcessor {
             dateRange,
             commitFrequency,
             averageCommitSize: totalCommits > 0 ? Math.round((totalAdditions + totalDeletions) / totalCommits) : 0,
-            productivity: this.calculateProductivityScore(totalCommits, totalAdditions, totalDeletions, dateRange.days)
+            productivity: this.calculateProductivityScore(totalCommits, totalAdditions, totalDeletions, dateRange.days),
+            repositorySize: estimatedRepoSize,
+            totalLinesOfCode: estimatedTotalLOC
+        };
+    }
+
+    /**
+     * Estimates repository storage size based on lines of code and file count
+     * @param {number} totalLines - Total lines added
+     * @param {number} fileCount - Number of files
+     * @returns {Object} Size estimate with value and unit
+     */
+    estimateRepositorySize(totalLines, fileCount) {
+        // Rough estimation: average 50 characters per line, plus overhead
+        const avgCharsPerLine = 50;
+        const bytesPerChar = 2; // UTF-8 encoding
+        const fileOverhead = 1024; // Average file metadata overhead
+        
+        const contentSize = totalLines * avgCharsPerLine * bytesPerChar;
+        const metadataSize = fileCount * fileOverhead;
+        const gitOverhead = contentSize * 0.3; // Git repository overhead
+        
+        const totalBytes = contentSize + metadataSize + gitOverhead;
+        
+        if (totalBytes < 1024) {
+            return { value: Math.round(totalBytes), unit: 'B' };
+        } else if (totalBytes < 1024 * 1024) {
+            return { value: Math.round(totalBytes / 1024), unit: 'KB' };
+        } else {
+            return { value: Math.round(totalBytes / (1024 * 1024)), unit: 'MB' };
+        }
+    }
+
+    /**
+     * Calculates metrics for date-filtered commits
+     * @param {Array} commits - Filtered commits array
+     * @param {Date} startDate - Filter start date
+     * @param {Date} endDate - Filter end date
+     * @returns {Object} Date-filtered metrics
+     */
+    calculateDateFilteredMetrics(commits, startDate = null, endDate = null) {
+        let filteredCommits = commits;
+        
+        if (startDate || endDate) {
+            filteredCommits = commits.filter(commit => {
+                const commitDate = new Date(commit.date);
+                if (startDate && commitDate < startDate) return false;
+                if (endDate && commitDate > endDate) return false;
+                return true;
+            });
+        }
+        
+        const filteredCommitCount = filteredCommits.length;
+        let filteredAdditions = 0;
+        let filteredDeletions = 0;
+        
+        filteredCommits.forEach(commit => {
+            if (commit.stats) {
+                filteredAdditions += commit.stats.additions || 0;
+                filteredDeletions += commit.stats.deletions || 0;
+            }
+        });
+        
+        const dateRange = startDate && endDate ? {
+            start: startDate,
+            end: endDate,
+            days: Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24))
+        } : null;
+        
+        return {
+            filteredCommits: filteredCommitCount,
+            filteredAdditions,
+            filteredDeletions,
+            filteredProductivity: this.calculateProductivityScore(
+                filteredCommitCount, 
+                filteredAdditions, 
+                filteredDeletions, 
+                dateRange ? dateRange.days : 1
+            ),
+            dateRange
         };
     }
 

@@ -33,12 +33,24 @@
     color: #2980b9;
 }
 
+/* Metrics Sections */
+.metrics-section {
+    margin-bottom: 2rem;
+}
+
+.metrics-section h4 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
 /* Metrics Grid */
 .metrics-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .metric-card {
@@ -61,6 +73,14 @@
     right: 0;
     height: 3px;
     background: linear-gradient(90deg, #3498db, #2ecc71);
+}
+
+.metric-card.repository-metric::before {
+    background: linear-gradient(90deg, #3498db, #9b59b6);
+}
+
+.metric-card.filtered-metric::before {
+    background: linear-gradient(90deg, #e74c3c, #f39c12);
 }
 
 .metric-card:hover {
@@ -126,6 +146,7 @@
     border-bottom: 1px solid #e1e8ed;
     transition: background-color 0.2s ease;
     position: relative;
+    cursor: pointer;
 }
 
 .commit-item:last-child {
@@ -142,6 +163,18 @@
     gap: 1rem;
     margin-bottom: 0.5rem;
     flex-wrap: wrap;
+    cursor: pointer;
+}
+
+.expand-icon {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: #666;
+    transition: transform 0.3s ease;
+}
+
+.commit-item.expanded .expand-icon {
+    transform: rotate(90deg);
 }
 
 .commit-sha {
@@ -162,7 +195,6 @@
 .commit-date {
     color: #666;
     font-size: 0.9rem;
-    margin-left: auto;
 }
 
 .commit-message {
@@ -189,6 +221,91 @@
 
 .commit-stats .files {
     color: #666;
+}
+
+/* Expandable Commit Details */
+.commit-details-expanded {
+    display: none;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e1e8ed;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+.commit-item.expanded .commit-details-expanded {
+    display: block;
+}
+
+.commit-full-message h5,
+.commit-metadata h5,
+.commit-files h5 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.commit-full-message pre {
+    background: white;
+    padding: 1rem;
+    border-radius: 4px;
+    border: 1px solid #e1e8ed;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: #2c3e50;
+}
+
+.metadata-row {
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.metadata-row strong {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.commit-files {
+    margin-top: 1rem;
+}
+
+.commit-files ul {
+    list-style: none;
+    padding: 0;
+    background: white;
+    border-radius: 4px;
+    border: 1px solid #e1e8ed;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.commit-files li {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid #f1f3f4;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.8rem;
+    color: #2c3e50;
+}
+
+.commit-files li:last-child {
+    border-bottom: none;
+}
+
+.commit-files li em {
+    color: #666;
+    font-style: italic;
+}
+
+.commits-help {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    font-style: italic;
 }
 
 /* Charts Container */
