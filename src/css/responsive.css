@@ -1,0 +1,501 @@
+/* Responsive Design Styles - Media queries and responsive adjustments */
+
+/* Large screens (desktops) */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .charts-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Medium screens (tablets, small laptops) */
+@media (max-width: 992px) {
+    .container {
+        max-width: 960px;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+    
+    .section {
+        padding: 1.5rem;
+        margin: 1.5rem auto;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+    }
+    
+    .input-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .input-field {
+        min-width: unset;
+        width: 100%;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+    
+    .commit-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .commit-date {
+        margin-left: 0;
+    }
+    
+    .charts-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Small screens (tablets) */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    .dashboard-header {
+        padding: 1.5rem 0;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 1.75rem;
+    }
+    
+    main {
+        padding: 1rem 0;
+    }
+    
+    .section {
+        margin: 1rem auto;
+        padding: 1rem;
+        border-radius: 6px;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .metric-card {
+        padding: 1rem;
+    }
+    
+    .metric-value {
+        font-size: 1.5rem;
+    }
+    
+    .metric-label {
+        font-size: 0.8rem;
+    }
+    
+    .repository-info {
+        padding: 1rem;
+    }
+    
+    .commit-item {
+        padding: 0.75rem;
+    }
+    
+    .commit-stats {
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .chart-section {
+        padding: 1rem;
+    }
+    
+    .commits-list {
+        max-height: 400px;
+    }
+    
+    /* Timeline chart adjustments */
+    .timeline-chart {
+        height: 200px;
+    }
+    
+    .chart-label {
+        font-size: 0.65rem;
+        transform: rotate(-45deg);
+    }
+    
+    /* Contributors chart adjustments */
+    .contributor-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .contributor-name {
+        font-size: 0.9rem;
+    }
+    
+    .contributor-commits {
+        font-size: 0.8rem;
+    }
+    
+    /* Legend adjustments */
+    .chart-legend {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .legend-item {
+        font-size: 0.8rem;
+    }
+    
+    /* Table responsive */
+    .table {
+        font-size: 0.9rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.5rem;
+    }
+}
+
+/* Extra small screens (phones) */
+@media (max-width: 576px) {
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .version-indicator {
+        font-size: 0.8rem;
+    }
+    
+    .section {
+        margin: 0.75rem auto;
+        padding: 0.75rem;
+    }
+    
+    .section h2 {
+        font-size: 1.5rem;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    .metric-card {
+        padding: 0.75rem;
+    }
+    
+    .metric-value {
+        font-size: 1.25rem;
+    }
+    
+    .metric-label {
+        font-size: 0.75rem;
+    }
+    
+    .input-group {
+        gap: 0.5rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .repository-info {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .repository-info h3 {
+        font-size: 1.25rem;
+    }
+    
+    .commit-item {
+        padding: 0.5rem;
+    }
+    
+    .commit-sha {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.4rem;
+    }
+    
+    .commit-message {
+        font-size: 0.9rem;
+        line-height: 1.3;
+    }
+    
+    .commit-stats {
+        font-size: 0.8rem;
+        gap: 0.5rem;
+    }
+    
+    .chart-section {
+        padding: 0.75rem;
+    }
+    
+    .chart-section h4 {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .chart {
+        min-height: 150px;
+    }
+    
+    /* Timeline chart mobile */
+    .timeline-chart {
+        height: 150px;
+    }
+    
+    .chart-bars {
+        padding: 0 5px;
+    }
+    
+    .chart-labels {
+        padding: 0 5px;
+    }
+    
+    .chart-label {
+        font-size: 0.6rem;
+        transform: rotate(-60deg);
+    }
+    
+    .bar-value {
+        font-size: 0.6rem;
+        top: -15px;
+    }
+    
+    /* Stacked bar mobile */
+    .stacked-bar {
+        height: 15px;
+    }
+    
+    /* Date range mobile */
+    .date-range {
+        padding: 0.75rem;
+    }
+    
+    .date-range h4 {
+        font-size: 0.9rem;
+    }
+    
+    .date-range p {
+        font-size: 0.8rem;
+    }
+    
+    /* Commits header mobile */
+    .commits-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .commits-header h4 {
+        font-size: 1rem;
+    }
+    
+    /* Make tables scrollable on mobile */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .table-responsive .table {
+        min-width: 600px;
+    }
+}
+
+/* Extra small screens (very small phones) */
+@media (max-width: 375px) {
+    .container {
+        padding: 0 10px;
+    }
+    
+    .dashboard-header {
+        padding: 1rem 0;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 1.25rem;
+        line-height: 1.2;
+    }
+    
+    .section {
+        margin: 0.5rem auto;
+        padding: 0.5rem;
+    }
+    
+    .metric-value {
+        font-size: 1rem;
+    }
+    
+    .commit-header {
+        gap: 0.25rem;
+    }
+    
+    .commit-message {
+        font-size: 0.85rem;
+    }
+    
+    .chart-label {
+        font-size: 0.55rem;
+    }
+    
+    .legend-item {
+        font-size: 0.75rem;
+    }
+    
+    .legend-color {
+        width: 10px;
+        height: 10px;
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+    .dashboard-header {
+        padding: 1rem 0;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .charts-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .commits-list {
+        max-height: 300px;
+    }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .chart-point {
+        width: 8px;
+        height: 8px;
+    }
+    
+    .legend-color {
+        width: 14px;
+        height: 14px;
+    }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .chart-bar,
+    .progress-bar,
+    .bar-fill {
+        transition: none;
+    }
+}
+
+/* Dark mode support (if implemented) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #1a1a1a;
+        --text-color: #ffffff;
+        --card-bg: #2d2d2d;
+        --border-color: #404040;
+    }
+    
+    /* This would be expanded if dark mode is implemented */
+}
+
+/* Print-specific responsive adjustments */
+@media print {
+    .dashboard-header {
+        break-inside: avoid;
+    }
+    
+    .section {
+        break-inside: avoid;
+        margin: 1rem 0;
+        box-shadow: none;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: repeat(4, 1fr);
+        break-inside: avoid;
+    }
+    
+    .chart-section {
+        break-inside: avoid;
+    }
+    
+    .commits-list {
+        max-height: none;
+        overflow: visible;
+    }
+    
+    .commit-item {
+        break-inside: avoid;
+    }
+}
+
+/* Accessibility improvements for smaller screens */
+@media (max-width: 768px) {
+    /* Increase touch targets */
+    .btn {
+        min-height: 44px;
+        padding: 0.75rem 1rem;
+    }
+    
+    .input-field {
+        min-height: 44px;
+    }
+    
+    .chart-bar,
+    .chart-point {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    /* Improve text readability */
+    body {
+        font-size: 16px;
+        line-height: 1.5;
+    }
+    
+    .commit-message {
+        line-height: 1.4;
+    }
+    
+    /* Ensure adequate spacing */
+    .commit-item {
+        margin-bottom: 0.5rem;
+    }
+    
+    .metric-card {
+        margin-bottom: 1rem;
+    }
+}

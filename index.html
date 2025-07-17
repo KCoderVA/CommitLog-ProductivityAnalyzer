@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Commit Productivity Analyzer</title>
+    <link rel="stylesheet" href="src/css/main.css">
+    <link rel="stylesheet" href="src/css/dashboard.css">
+    <link rel="stylesheet" href="src/css/responsive.css">
+</head>
+<body>
+    <div id="app">
+        <header class="dashboard-header">
+            <h1>Git/GitHub Commit Log Productivity Analyzer</h1>
+            <p class="version-indicator" id="version-indicator">Loading...</p>
+        </header>
+        
+        <main>
+            <!-- Repository Selection Section -->
+            <section id="repo-selection" class="section">
+                <h2>Repository Selection</h2>
+                <div class="input-group">
+                    <button id="select-local-repo" class="btn btn-primary" style="display: none;">Select Local Git Repository</button>
+                    <input type="text" id="github-repo-url" placeholder="Enter GitHub repository URL" class="input-field">
+                    <button id="analyze-github-repo" class="btn btn-secondary">Analyze GitHub Repository</button>
+                    <p class="note" id="local-repo-note" style="display: none;">Note: Local repository analysis is not available in the online version</p>
+                </div>
+            </section>
+
+            <!-- Summary Analysis Section -->
+            <section id="summary-analysis" class="section" style="display: none;">
+                <h2>Repository Summary</h2>
+                <div id="summary-content">
+                    <!-- Summary data will be populated here -->
+                </div>
+            </section>
+
+            <!-- Detailed Commit History Section -->
+            <section id="detailed-history" class="section" style="display: none;">
+                <h2>Detailed Commit History</h2>
+                <div id="commit-details">
+                    <!-- Detailed commit data will be populated here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Configuration and Scripts -->
+    <script>
+        // Environment Detection and Dynamic Loading
+        (function() {
+            // Detect if running locally (file://) or on a server (http/https)
+            const isLocal = window.location.protocol === 'file:' || 
+                           window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1' ||
+                           window.location.hostname === '';
+            
+            // Detect if running on GitHub Pages
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            // Set environment
+            window.APP_ENVIRONMENT = isLocal ? 'offline' : (isGitHubPages ? 'github-pages' : 'online');
+            
+            // Update UI based on environment
+            document.addEventListener('DOMContentLoaded', function() {
+                const versionIndicator = document.getElementById('version-indicator');
+                const localRepoButton = document.getElementById('select-local-repo');
+                const localRepoNote = document.getElementById('local-repo-note');
+                const analyzeButton = document.getElementById('analyze-github-repo');
+                
+                if (window.APP_ENVIRONMENT === 'offline') {
+                    versionIndicator.textContent = 'Offline Version';
+                    localRepoButton.style.display = 'inline-block';
+                    localRepoNote.style.display = 'none';
+                    analyzeButton.className = 'btn btn-secondary';
+                } else if (window.APP_ENVIRONMENT === 'github-pages') {
+                    versionIndicator.textContent = 'Online Version - Hosted on GitHub Pages';
+                    localRepoButton.style.display = 'none';
+                    localRepoNote.style.display = 'block';
+                    analyzeButton.className = 'btn btn-primary';
+                } else {
+                    versionIndicator.textContent = 'Online Version';
+                    localRepoButton.style.display = 'none';
+                    localRepoNote.style.display = 'block';
+                    analyzeButton.className = 'btn btn-primary';
+                }
+            });
+            
+            // Dynamic script loading based on environment
+            function loadScript(src) {
+                return new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = src;
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+            }
+            
+            // Load configuration based on environment
+            const configScript = window.APP_ENVIRONMENT === 'offline' ? 
+                'config/offline-config.js' : 'config/online-config.js';
+            
+            // Core scripts that are always needed
+            const coreScripts = [
+                configScript,
+                'src/js/utils/helpers.js',
+                'src/js/core/github-api.js',
+                'src/js/core/data-processor.js',
+                'src/js/ui/dashboard.js',
+                'src/js/ui/charts.js'
+            ];
+            
+            // Additional scripts for offline version
+            const offlineScripts = [
+                'src/js/utils/file-handler.js',
+                'src/js/core/git-analyzer.js'
+            ];
+            
+            // Load scripts sequentially
+            async function loadScripts() {
+                try {
+                    // Load core scripts
+                    for (const script of coreScripts) {
+                        await loadScript(script);
+                    }
+                    
+                    // Load offline-specific scripts if in offline mode
+                    if (window.APP_ENVIRONMENT === 'offline') {
+                        for (const script of offlineScripts) {
+                            await loadScript(script);
+                        }
+                    }
+                    
+                    console.log('All scripts loaded successfully for', window.APP_ENVIRONMENT, 'environment');
+                } catch (error) {
+                    console.error('Error loading scripts:', error);
+                    // Fallback: show error message to user
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const repoSection = document.getElementById('repo-selection');
+                        if (repoSection) {
+                            const errorDiv = document.createElement('div');
+                            errorDiv.className = 'error-message';
+                            errorDiv.textContent = 'Failed to load application scripts. Please refresh the page.';
+                            repoSection.appendChild(errorDiv);
+                        }
+                    });
+                }
+            }
+            
+            loadScripts();
+        })();
+    </script>
+</body>
+</html>

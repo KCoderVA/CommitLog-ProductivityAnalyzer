@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Commit Productivity Analyzer - Offline Version</title>
+    <link rel="stylesheet" href="src/css/main.css">
+    <link rel="stylesheet" href="src/css/dashboard.css">
+    <link rel="stylesheet" href="src/css/responsive.css">
+</head>
+<body>
+    <div id="app">
+        <header class="dashboard-header">
+            <h1>Git/GitHub Commit Log Productivity Analyzer</h1>
+            <p class="version-indicator">Offline Version</p>
+        </header>
+        
+        <main>
+            <!-- Repository Selection Section -->
+            <section id="repo-selection" class="section">
+                <h2>Repository Selection</h2>
+                <div class="input-group">
+                    <button id="select-local-repo" class="btn btn-primary">Select Local Git Repository</button>
+                    <input type="text" id="github-repo-url" placeholder="Enter GitHub repository URL" class="input-field">
+                    <button id="analyze-github-repo" class="btn btn-secondary">Analyze GitHub Repository</button>
+                </div>
+            </section>
+
+            <!-- Summary Analysis Section -->
+            <section id="summary-analysis" class="section" style="display: none;">
+                <h2>Repository Summary</h2>
+                <div id="summary-content">
+                    <!-- Summary data will be populated here -->
+                </div>
+            </section>
+
+            <!-- Detailed Commit History Section -->
+            <section id="detailed-history" class="section" style="display: none;">
+                <h2>Detailed Commit History</h2>
+                <div id="commit-details">
+                    <!-- Detailed commit data will be populated here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Configuration and Scripts -->
+    <script src="config/offline-config.js"></script>
+    <script src="src/js/utils/helpers.js"></script>
+    <script src="src/js/utils/file-handler.js"></script>
+    <script src="src/js/core/git-analyzer.js"></script>
+    <script src="src/js/core/github-api.js"></script>
+    <script src="src/js/core/data-processor.js"></script>
+    <script src="src/js/ui/dashboard.js"></script>
+    <script src="src/js/ui/charts.js"></script>
+</body>
+</html>
