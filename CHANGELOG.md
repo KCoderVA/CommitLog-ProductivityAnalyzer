@@ -14,6 +14,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Security
 
+## [0.1.14] - 2025-07-17
+
+### Added
+- **Enhanced Mock Data Testing**: Added "Load Mock Data (Demo)" button for testing full functionality
+  - Mock data now includes realistic multi-paragraph commit messages
+  - Accurate statistics matching actual Git terminal output (371 additions, 61 deletions)
+  - Comprehensive testing mechanism for UI features until FileHandler enhancement
+
+### Fixed
+- **Full Commit Message Display**: Fixed issue where expandable commit details only showed first line of commit messages
+  - DataProcessor now preserves complete multi-paragraph commit messages
+  - Enhanced mock data with realistic commit messages including bullet points and detailed descriptions
+  - Expandable commit details now display full commit content as intended
+- **Accurate Statistics Display**: Mock data now shows correct addition/deletion counts that match Git terminal output
+
+### Changed
+- Enhanced GitAnalyzer mock data to include realistic development scenarios
+- Improved commit message handling throughout the data processing pipeline
+
 ## [0.1.13] - 2025-07-17
 
 ### Fixed
