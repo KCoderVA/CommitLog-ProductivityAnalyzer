@@ -388,18 +388,27 @@ class DataProcessor {
      * @returns {Array} Formatted commits
      */
     formatCommitsForDisplay(commits) {
-        return commits.map(commit => ({
-            ...commit,
-            shortSha: commit.sha.substring(0, 7),
-            formattedDate: new Date(commit.date).toLocaleString(),
-            relativeDate: this.getRelativeDate(commit.date),
-            messagePreview: commit.message.split('\n')[0].substring(0, 80) + 
-                (commit.message.length > 80 ? '...' : ''),
-            stats: commit.stats ? {
-                ...commit.stats,
-                totalChanges: (commit.stats.additions || 0) + (commit.stats.deletions || 0)
-            } : null
-        }));
+        return commits.map(commit => {
+            const fullMessage = commit.message || '';
+            const firstLine = fullMessage.split('\n')[0];
+            const messagePreview = firstLine.length > 80 ? 
+                firstLine.substring(0, 77) + '...' : 
+                firstLine;
+            
+            return {
+                ...commit,
+                shortSha: (commit.sha || '').substring(0, 7),
+                formattedDate: new Date(commit.date).toLocaleString(),
+                relativeDate: this.getRelativeDate(commit.date),
+                absoluteDate: new Date(commit.date).toLocaleString(),
+                message: fullMessage, // Preserve full message
+                messagePreview: messagePreview, // Short preview for list view
+                stats: commit.stats ? {
+                    ...commit.stats,
+                    totalChanges: (commit.stats.additions || 0) + (commit.stats.deletions || 0)
+                } : null
+            };
+        });
     }
 
     /**

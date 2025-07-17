@@ -90,6 +90,12 @@ class Dashboard {
             analyzeGitHubBtn.addEventListener('click', () => this.analyzeGitHubRepository());
         }
 
+        // Mock data button for testing
+        const loadMockDataBtn = document.getElementById('load-mock-data');
+        if (loadMockDataBtn) {
+            loadMockDataBtn.addEventListener('click', () => this.loadMockData());
+        }
+
         // GitHub URL input - allow Enter key
         const githubInput = document.getElementById('github-repo-url');
         if (githubInput) {
@@ -295,6 +301,60 @@ class Dashboard {
         } catch (error) {
             console.error('Error analyzing GitHub repository:', error);
             this.showError(`Failed to analyze repository: ${error.message}`);
+        } finally {
+            this.setAnalyzing(false);
+        }
+    }
+
+    /**
+     * Loads mock data for testing purposes
+     */
+    async loadMockData() {
+        try {
+            console.log('Loading mock data...');
+            this.setAnalyzing(true);
+            this.showStatus('Loading enhanced mock data...');
+
+            // Use GitAnalyzer to generate mock data
+            if (!this.gitAnalyzer) {
+                throw new Error('GitAnalyzer not available');
+            }
+
+            // Analyze mock repository data
+            const analysisResult = await this.gitAnalyzer.analyzeRepository('Mock Repository');
+            console.log('Mock analysis result:', analysisResult);
+
+            // Process the mock data
+            const processedData = this.dataProcessor ? 
+                this.dataProcessor.processCommitData(analysisResult.commits, analysisResult.repository) : 
+                {
+                    repository: analysisResult.repository,
+                    commits: analysisResult.commits || [],
+                    summary: {
+                        totalCommits: (analysisResult.commits || []).length,
+                        contributors: 1,
+                        totalFiles: 0,
+                        totalAdditions: 0,
+                        totalDeletions: 0,
+                        netChanges: 0,
+                        averageCommitSize: 0,
+                        productivity: 'N/A',
+                        dateRange: { startFormatted: 'N/A', endFormatted: 'N/A', days: 0 },
+                        filteredCommits: analysisResult.commits || [],
+                        filteredSummary: {}
+                    }
+                };
+
+            console.log('Processed mock data:', processedData);
+
+            this.currentData = processedData;
+            this.displayResults(processedData);
+            this.hideStatus();
+            console.log('Mock data loaded successfully');
+
+        } catch (error) {
+            console.error('Error loading mock data:', error);
+            this.showError(`Failed to load mock data: ${error.message}`);
         } finally {
             this.setAnalyzing(false);
         }
