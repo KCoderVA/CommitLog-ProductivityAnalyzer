@@ -18,7 +18,29 @@ limitations under the License.
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Git Commit Productivity Analyzer</title>
+    <meta name="description" content="Comprehensive Git/GitHub repository commit log analyzer and productivity dashboard. Analyze local repositories and GitHub.com projects with detailed metrics and visualizations.">
+    <meta name="keywords" content="git, github, commit, productivity, analyzer, dashboard, repository, metrics, visualization">
+    <meta name="author" content="KCoderVA">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Git/GitHub Commit Log Productivity Analyzer">
+    <meta property="og:description" content="Analyze Git repository commit logs and extract productivity insights with this comprehensive dashboard.">
+    <meta property="og:site_name" content="Commit Log Productivity Analyzer">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary">
+    <meta property="twitter:title" content="Git/GitHub Commit Log Productivity Analyzer">
+    <meta property="twitter:description" content="Analyze Git repository commit logs and extract productivity insights with this comprehensive dashboard.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="src/assets/favicon.ico">
+    <link rel="apple-touch-icon" href="src/assets/icons/apple-touch-icon.png">
+    
+    <title>Git/GitHub Commit Log Productivity Analyzer</title>
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="src/css/main.css">
     <link rel="stylesheet" href="src/css/dashboard.css">
     <link rel="stylesheet" href="src/css/responsive.css">
@@ -26,38 +48,104 @@ limitations under the License.
 <body>
     <div id="app">
         <header class="dashboard-header">
-            <h1>Git/GitHub Commit Log Productivity Analyzer</h1>
-            <p class="version-indicator" id="version-indicator">Loading...</p>
+            <div class="header-content">
+                <h1>Git/GitHub Commit Log Productivity Analyzer</h1>
+                <p class="subtitle">Comprehensive repository analysis and productivity insights</p>
+                <p class="version-indicator" id="version-indicator">Loading...</p>
+            </div>
         </header>
         
         <main>
             <!-- Repository Selection Section -->
             <section id="repo-selection" class="section">
-                <h2>Repository Selection</h2>
+                <div class="section-header">
+                    <h2>Repository Selection</h2>
+                    <p class="section-description">Choose a repository to analyze commit logs and extract productivity metrics</p>
+                </div>
+                
                 <div class="input-group">
-                    <button id="select-local-repo" class="btn btn-primary" style="display: none;">Select Local Git Repository</button>
-                    <input type="text" id="github-repo-url" placeholder="Enter GitHub repository URL" class="input-field">
-                    <button id="analyze-github-repo" class="btn btn-secondary">Analyze GitHub Repository</button>
-                    <p class="note" id="local-repo-note" style="display: none;">Note: Local repository analysis is not available in the online version</p>
+                    <div class="local-repo-section">
+                        <button id="select-local-repo" class="btn btn-primary" style="display: none;" title="Select a local Git repository folder">
+                            📁 Select Local Git Repository
+                        </button>
+                        <p class="help-text" id="local-help" style="display: none;">Choose a folder containing a .git directory</p>
+                    </div>
+                    
+                    <div class="github-repo-section">
+                        <div class="input-wrapper">
+                            <input type="text" 
+                                   id="github-repo-url" 
+                                   placeholder="https://github.com/username/repository-name" 
+                                   class="input-field"
+                                   title="Enter a GitHub repository URL">
+                            <button id="analyze-github-repo" class="btn btn-secondary" title="Analyze the GitHub repository">
+                                🔍 Analyze GitHub Repository
+                            </button>
+                        </div>
+                        <p class="help-text">Enter the full URL of any public GitHub repository</p>
+                    </div>
+                    
+                    <div class="note-section">
+                        <p class="note" id="local-repo-note" style="display: none;">
+                            ℹ️ <strong>Note:</strong> Local repository analysis is not available in the online version for security reasons.
+                        </p>
+                        <p class="note" id="offline-note" style="display: none;">
+                            ℹ️ <strong>Offline Mode:</strong> You can analyze both local repositories and GitHub repositories.
+                        </p>
+                    </div>
                 </div>
             </section>
 
             <!-- Summary Analysis Section -->
             <section id="summary-analysis" class="section" style="display: none;">
-                <h2>Repository Summary</h2>
+                <div class="section-header">
+                    <h2>Repository Summary</h2>
+                    <p class="section-description">High-level overview of repository statistics and productivity metrics</p>
+                </div>
                 <div id="summary-content">
-                    <!-- Summary data will be populated here -->
+                    <!-- Summary data will be populated here dynamically -->
                 </div>
             </section>
 
             <!-- Detailed Commit History Section -->
             <section id="detailed-history" class="section" style="display: none;">
-                <h2>Detailed Commit History</h2>
+                <div class="section-header">
+                    <h2>Detailed Commit History</h2>
+                    <p class="section-description">Comprehensive commit timeline with detailed analysis and visualizations</p>
+                </div>
                 <div id="commit-details">
-                    <!-- Detailed commit data will be populated here -->
+                    <!-- Detailed commit data will be populated here dynamically -->
+                </div>
+            </section>
+            
+            <!-- Loading and Error States -->
+            <section id="loading-section" class="section" style="display: none;">
+                <div class="loading-content">
+                    <div class="loading-spinner"></div>
+                    <h3>Analyzing Repository...</h3>
+                    <p id="loading-message">Fetching repository data and processing commit history...</p>
+                </div>
+            </section>
+            
+            <section id="error-section" class="section error-section" style="display: none;">
+                <div class="error-content">
+                    <h3>⚠️ Analysis Error</h3>
+                    <p id="error-message">An error occurred during repository analysis.</p>
+                    <button id="retry-button" class="btn btn-primary">Try Again</button>
                 </div>
             </section>
         </main>
+        
+        <footer class="dashboard-footer">
+            <div class="footer-content">
+                <p>&copy; 2025 KCoderVA | Licensed under <a href="LICENSE" target="_blank">Apache 2.0</a></p>
+                <p class="footer-links">
+                    <a href="docs/user-guide.md" target="_blank">User Guide</a> | 
+                    <a href="docs/api-documentation.md" target="_blank">API Docs</a> | 
+                    <a href="https://github.com/KCoderVA" target="_blank">GitHub</a>
+                </p>
+            </div>
+        </footer>
     </div>
 
     <!-- Configuration and Scripts -->
@@ -81,22 +169,33 @@ limitations under the License.
                 const versionIndicator = document.getElementById('version-indicator');
                 const localRepoButton = document.getElementById('select-local-repo');
                 const localRepoNote = document.getElementById('local-repo-note');
+                const offlineNote = document.getElementById('offline-note');
+                const localHelp = document.getElementById('local-help');
                 const analyzeButton = document.getElementById('analyze-github-repo');
                 
                 if (window.APP_ENVIRONMENT === 'offline') {
-                    versionIndicator.textContent = 'Offline Version';
+                    versionIndicator.textContent = '🏠 Offline Mode - Full Functionality';
+                    versionIndicator.className = 'version-indicator offline';
                     localRepoButton.style.display = 'inline-block';
+                    localHelp.style.display = 'block';
                     localRepoNote.style.display = 'none';
+                    offlineNote.style.display = 'block';
                     analyzeButton.className = 'btn btn-secondary';
                 } else if (window.APP_ENVIRONMENT === 'github-pages') {
-                    versionIndicator.textContent = 'Online Version - Hosted on GitHub Pages';
+                    versionIndicator.textContent = '🌐 Online - GitHub Pages Hosted';
+                    versionIndicator.className = 'version-indicator github-pages';
                     localRepoButton.style.display = 'none';
+                    localHelp.style.display = 'none';
                     localRepoNote.style.display = 'block';
+                    offlineNote.style.display = 'none';
                     analyzeButton.className = 'btn btn-primary';
                 } else {
-                    versionIndicator.textContent = 'Online Version';
+                    versionIndicator.textContent = '☁️ Online Mode - Web Hosted';
+                    versionIndicator.className = 'version-indicator online';
                     localRepoButton.style.display = 'none';
+                    localHelp.style.display = 'none';
                     localRepoNote.style.display = 'block';
+                    offlineNote.style.display = 'none';
                     analyzeButton.className = 'btn btn-primary';
                 }
             });
