@@ -64,10 +64,24 @@ class Dashboard {
      * @private
      */
     setupEventListeners() {
+        console.log('Setting up event listeners...');
+        
         // Local repository selection (offline version only)
         const selectLocalBtn = document.getElementById('select-local-repo');
+        console.log('Select local button found:', !!selectLocalBtn);
+        console.log('Current environment:', window.APP_ENVIRONMENT);
+        console.log('FileHandler available:', !!window.FileHandler);
+        
         if (selectLocalBtn && window.APP_ENVIRONMENT === 'offline') {
-            selectLocalBtn.addEventListener('click', () => this.selectLocalRepository());
+            console.log('Adding click listener to local repository button');
+            selectLocalBtn.addEventListener('click', () => {
+                console.log('Local repository button clicked!');
+                this.selectLocalRepository();
+            });
+        } else if (selectLocalBtn) {
+            console.log('Local button found but environment is not offline:', window.APP_ENVIRONMENT);
+        } else {
+            console.log('Local repository button not found in DOM');
         }
 
         // GitHub repository analysis
@@ -575,14 +589,23 @@ class Dashboard {
     }
 }
 
-// Auto-initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
+// Manual initialization function - called after all scripts are loaded
+window.initializeDashboard = function() {
+    if (window.dashboardInstance) {
+        console.warn('Dashboard already initialized');
+        return window.dashboardInstance;
+    }
+    
+    console.log('Initializing Dashboard after all scripts loaded...');
     const dashboard = new Dashboard();
     dashboard.initialize();
     
     // Make dashboard globally available for debugging
     window.dashboard = dashboard;
-});
+    window.dashboardInstance = dashboard;
+    
+    return dashboard;
+};
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main App Simulation</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .btn { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 10px; }
+        .btn-primary { background: #007bff; }
+        .btn:hover { background: #0056b3; }
+        .log { background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin: 20px 0; border-radius: 5px; white-space: pre-wrap; font-family: monospace; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>Main App Button Simulation</h1>
+    <p>This simulates the exact button structure from the main application.</p>
+    
+    <!-- Simulate the exact button from index.html -->
+    <button id="select-local-repo" class="btn btn-primary" title="Select a local Git repository folder">
+        📁 Select Local Git Repository
+    </button>
+    
+    <div id="log" class="log">Loading simulation...</div>
+
+    <script>
+        const log = document.getElementById('log');
+        
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            log.textContent += `[${timestamp}] ${message}\n`;
+            log.scrollTop = log.scrollHeight;
+            console.log(message);
+        }
+
+        // Simulate environment detection
+        const isLocal = window.location.protocol === 'file:' || 
+                       window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1' ||
+                       window.location.hostname === '';
+        
+        window.APP_ENVIRONMENT = isLocal ? 'offline' : 'online';
+
+        addLog('=== Main App Simulation ===');
+        addLog(`Environment: ${window.APP_ENVIRONMENT}`);
+        addLog(`Protocol: ${window.location.protocol}`);
+
+        // Simulate FileHandler class
+        class FileHandler {
+            async selectGitRepository() {
+                addLog('FileHandler.selectGitRepository() called');
+                
+                if ('showDirectoryPicker' in window) {
+                    addLog('Using modern File System Access API');
+                    try {
+                        const dirHandle = await window.showDirectoryPicker({
+                            mode: 'read',
+                            startIn: 'documents'
+                        });
+                        addLog(`Directory selected: ${dirHandle.name}`);
+                        
+                        // Check for .git folder
+                        try {
+                            await dirHandle.getDirectoryHandle('.git');
+                            addLog('✅ .git directory found - Valid Git repository');
+                            return dirHandle;
+                        } catch (e) {
+                            addLog('❌ No .git directory found');
+                            throw new Error('Selected directory is not a Git repository');
+                        }
+                    } catch (error) {
+                        if (error.name === 'AbortError') {
+                            addLog('User cancelled selection');
+                            return null;
+                        }
+                        addLog(`Error: ${error.message}`);
+                        throw error;
+                    }
+                } else {
+                    addLog('Using fallback webkitdirectory method');
+                    // Fallback implementation
+                    return new Promise((resolve, reject) => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.webkitdirectory = true;
+                        input.multiple = true;
+                        
+                        input.onchange = (e) => {
+                            const files = e.target.files;
+                            addLog(`Selected ${files.length} files`);
+                            
+                            const gitFiles = Array.from(files).filter(f => 
+                                f.webkitRelativePath.includes('.git/')
+                            );
+                            
+                            if (gitFiles.length > 0) {
+                                addLog('✅ Git files found - Valid Git repository');
+                                resolve(files);
+                            } else {
+                                addLog('❌ No Git files found');
+                                reject(new Error('Selected directory is not a Git repository'));
+                            }
+                        };
+                        
+                        input.click();
+                    });
+                }
+            }
+        }
+
+        // Make FileHandler globally available (like the main app)
+        window.FileHandler = FileHandler;
+
+        // Simulate Dashboard class method
+        async function selectLocalRepository() {
+            addLog('=== selectLocalRepository() called ===');
+            
+            try {
+                addLog('Checking environment and FileHandler...');
+                
+                if (window.APP_ENVIRONMENT !== 'offline') {
+                    throw new Error('Local repository analysis only available in offline mode');
+                }
+                
+                if (!window.FileHandler) {
+                    throw new Error('FileHandler not available');
+                }
+                
+                addLog('Creating FileHandler instance...');
+                const fileHandler = new FileHandler();
+                
+                addLog('Calling selectGitRepository...');
+                const repositorySource = await fileHandler.selectGitRepository();
+                
+                if (!repositorySource) {
+                    addLog('User cancelled selection');
+                    return;
+                }
+                
+                addLog('✅ Repository selection completed successfully!');
+                addLog('In the real app, this would now read and analyze the repository...');
+                
+            } catch (error) {
+                addLog(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // Set up event listener exactly like the main app
+        addLog('Setting up event listeners...');
+        
+        const selectLocalBtn = document.getElementById('select-local-repo');
+        addLog(`Button found: ${!!selectLocalBtn}`);
+        addLog(`Environment check: ${window.APP_ENVIRONMENT === 'offline'}`);
+        
+        if (selectLocalBtn && window.APP_ENVIRONMENT === 'offline') {
+            addLog('✅ Adding click listener to button');
+            selectLocalBtn.addEventListener('click', () => {
+                addLog('🖱️ Button clicked - calling selectLocalRepository()');
+                selectLocalRepository();
+            });
+        } else {
+            addLog('❌ Button or environment check failed');
+        }
+        
+        addLog('Setup complete - try clicking the button!');
+    </script>
+</body>
+</html>

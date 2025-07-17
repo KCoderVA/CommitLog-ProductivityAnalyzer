@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Immediate Button Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Direct File Picker Test</h1>
+    <p>This page tests the file picker functionality directly without any complex dependencies.</p>
+    
+    <button id="test-modern-api" class="btn">Test Modern File System API</button>
+    <button id="test-fallback-api" class="btn">Test Fallback Method</button>
+    <button id="test-simple-click" class="btn">Test Simple Click Handler</button>
+    
+    <div id="log" class="log">Click a button to test...</div>
+
+    <script>
+        const log = document.getElementById('log');
+        
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            log.textContent += `[${timestamp}] ${message}\n`;
+            log.scrollTop = log.scrollHeight;
+            console.log(message);
+        }
+
+        // Test 1: Modern File System Access API
+        document.getElementById('test-modern-api').addEventListener('click', async () => {
+            addLog('=== Testing Modern File System Access API ===');
+            
+            try {
+                addLog('Checking if showDirectoryPicker is available...');
+                if (!('showDirectoryPicker' in window)) {
+                    addLog('❌ showDirectoryPicker is NOT available in this browser');
+                    return;
+                }
+                
+                addLog('✅ showDirectoryPicker is available');
+                addLog('Calling showDirectoryPicker()...');
+                
+                const dirHandle = await window.showDirectoryPicker({
+                    mode: 'read',
+                    startIn: 'documents'
+                });
+                
+                addLog(`✅ Directory selected: ${dirHandle.name}`);
+                
+                // Check for .git folder
+                try {
+                    const gitDir = await dirHandle.getDirectoryHandle('.git');
+                    addLog('✅ .git directory found - This is a Git repository!');
+                } catch (e) {
+                    addLog('⚠️ No .git directory found - Not a Git repository');
+                }
+                
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    addLog('ℹ️ User cancelled the directory selection');
+                } else {
+                    addLog(`❌ Error: ${error.name} - ${error.message}`);
+                }
+            }
+        });
+
+        // Test 2: Fallback webkitdirectory method
+        document.getElementById('test-fallback-api').addEventListener('click', () => {
+            addLog('=== Testing Fallback webkitdirectory Method ===');
+            
+            try {
+                addLog('Creating file input with webkitdirectory...');
+                
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.webkitdirectory = true;
+                input.multiple = true;
+                
+                addLog('Setting up event handlers...');
+                
+                input.onchange = (event) => {
+                    const files = event.target.files;
+                    addLog(`✅ Files selected: ${files.length}`);
+                    
+                    if (files.length === 0) {
+                        addLog('No files selected');
+                        return;
+                    }
+                    
+                    // Check for Git files
+                    const gitFiles = Array.from(files).filter(file => 
+                        file.webkitRelativePath.includes('.git/')
+                    );
+                    
+                    if (gitFiles.length > 0) {
+                        addLog(`✅ Found ${gitFiles.length} Git files - This is a Git repository!`);
+                        addLog(`Repository: ${files[0].webkitRelativePath.split('/')[0]}`);
+                    } else {
+                        addLog('⚠️ No Git files found - Not a Git repository');
+                    }
+                };
+                
+                input.onclick = () => {
+                    addLog('Input clicked, resetting value...');
+                    input.value = '';
+                };
+                
+                addLog('Triggering file picker...');
+                input.click();
+                
+            } catch (error) {
+                addLog(`❌ Error: ${error.message}`);
+            }
+        });
+
+        // Test 3: Simple click test
+        document.getElementById('test-simple-click').addEventListener('click', () => {
+            addLog('=== Simple Click Test ===');
+            addLog('✅ Button click detected and handler executed!');
+            addLog('This confirms that basic event handling is working.');
+            
+            // Test alert
+            alert('Simple click test - alert dialog works!');
+        });
+
+        // Initial environment check
+        addLog('=== Environment Information ===');
+        addLog(`Browser: ${navigator.userAgent}`);
+        addLog(`Protocol: ${window.location.protocol}`);
+        addLog(`showDirectoryPicker available: ${'showDirectoryPicker' in window}`);
+        addLog(`webkitdirectory supported: ${'webkitdirectory' in document.createElement('input')}`);
+        addLog('=== Ready for testing ===');
+    </script>
+</body>
+</html>

@@ -247,6 +247,15 @@ limitations under the License.
                     }
                     
                     console.log('All scripts loaded successfully for', window.APP_ENVIRONMENT, 'environment');
+                    
+                    // Initialize Dashboard after all scripts are loaded
+                    if (typeof window.initializeDashboard === 'function') {
+                        console.log('Initializing Dashboard...');
+                        window.initializeDashboard();
+                    } else {
+                        console.error('Dashboard initialization function not found');
+                    }
+                    
                 } catch (error) {
                     console.error('Error loading scripts:', error);
                     // Fallback: show error message to user

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Button Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .btn { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 10px; }
+        .btn:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Quick Button Test</h1>
+    <p>This tests if basic button clicks and file dialogs work in your browser.</p>
+    
+    <!-- Test button with inline onclick -->
+    <button class="btn" onclick="testInlineClick()">Test Inline Click</button>
+    
+    <!-- Test button with addEventListener -->
+    <button id="test-listener" class="btn">Test Event Listener</button>
+    
+    <!-- Test file input (basic) -->
+    <button class="btn" onclick="testFileInput()">Test File Input</button>
+    
+    <!-- Test directory picker -->
+    <button class="btn" onclick="testDirectoryPicker()">Test Directory Picker</button>
+    
+    <div id="output" style="margin-top: 20px; padding: 10px; background: #f5f5f5; min-height: 100px;">
+        Results will appear here...
+    </div>
+
+    <script>
+        function log(message) {
+            const output = document.getElementById('output');
+            output.innerHTML += new Date().toLocaleTimeString() + ': ' + message + '<br>';
+            console.log(message);
+        }
+
+        function testInlineClick() {
+            log('✅ Inline click works!');
+            alert('Inline click successful!');
+        }
+
+        document.getElementById('test-listener').addEventListener('click', function() {
+            log('✅ Event listener works!');
+            alert('Event listener successful!');
+        });
+
+        function testFileInput() {
+            log('Testing basic file input...');
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.multiple = true;
+            
+            input.onchange = function(e) {
+                log(`✅ File input works! Selected ${e.target.files.length} files`);
+            };
+            
+            input.click();
+        }
+
+        async function testDirectoryPicker() {
+            log('Testing directory picker...');
+            
+            if ('showDirectoryPicker' in window) {
+                try {
+                    log('Calling showDirectoryPicker...');
+                    const dirHandle = await window.showDirectoryPicker({
+                        mode: 'read'
+                    });
+                    log(`✅ Directory picker works! Selected: ${dirHandle.name}`);
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        log('ℹ️ User cancelled directory selection');
+                    } else {
+                        log(`❌ Directory picker error: ${error.message}`);
+                    }
+                }
+            } else {
+                log('❌ showDirectoryPicker not supported in this browser');
+                
+                // Try fallback
+                log('Trying webkitdirectory fallback...');
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.webkitdirectory = true;
+                input.multiple = true;
+                
+                input.onchange = function(e) {
+                    log(`✅ webkitdirectory works! Selected ${e.target.files.length} files`);
+                };
+                
+                input.click();
+            }
+        }
+
+        // Initial environment check
+        log('=== Environment Check ===');
+        log('Protocol: ' + window.location.protocol);
+        log('showDirectoryPicker: ' + ('showDirectoryPicker' in window ? 'Available' : 'Not Available'));
+        log('webkitdirectory: ' + ('webkitdirectory' in document.createElement('input') ? 'Available' : 'Not Available'));
+        log('Ready for testing!');
+    </script>
+</body>
+</html>
