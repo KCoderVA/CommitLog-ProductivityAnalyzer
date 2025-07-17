@@ -97,14 +97,22 @@ class Dashboard {
      * Handles local repository selection
      */
     async selectLocalRepository() {
+        console.log('selectLocalRepository called');
+        console.log('Current environment:', window.APP_ENVIRONMENT);
+        console.log('FileHandler available:', !!window.FileHandler);
+        
         // Check if we're in offline environment and have the necessary components
         if (window.APP_ENVIRONMENT !== 'offline') {
-            this.showError('Local repository analysis is only available in the offline version.');
+            const message = `Local repository analysis is only available in the offline version. Current environment: ${window.APP_ENVIRONMENT}`;
+            console.error(message);
+            this.showError(message);
             return;
         }
 
         if (!window.FileHandler) {
-            this.showError('File handler not available. Please ensure you are using the offline version.');
+            const message = 'File handler not available. Please ensure you are using the offline version.';
+            console.error(message);
+            this.showError(message);
             return;
         }
 
@@ -113,19 +121,29 @@ class Dashboard {
             
             // Initialize file handler if not already done
             const fileHandler = new FileHandler();
+            console.log('FileHandler initialized:', fileHandler);
             
+            // Check browser capabilities
+            console.log('showDirectoryPicker available:', 'showDirectoryPicker' in window);
+            console.log('webkitdirectory supported:', 'webkitdirectory' in document.createElement('input'));
+            
+            this.showStatus('Opening file picker...');
             console.log('Opening file picker for local repository...');
             
             // Use the file handler to select repository
             const repositorySource = await fileHandler.selectGitRepository();
+            console.log('Repository source selected:', repositorySource);
             
             if (!repositorySource) {
                 // User cancelled selection
+                console.log('User cancelled repository selection');
+                this.hideStatus();
                 return;
             }
 
             this.showStatus('Reading repository data...');
             const repositoryData = await fileHandler.readGitRepository(repositorySource);
+            console.log('Repository data loaded:', repositoryData);
             
             if (!repositoryData.commits || repositoryData.commits.length === 0) {
                 this.showError('No commits found in the selected repository.');
@@ -146,10 +164,27 @@ class Dashboard {
             this.currentData = processedData;
             this.displayResults(processedData);
             this.hideStatus();
+            console.log('Local repository analysis completed successfully');
             
         } catch (error) {
             console.error('Error selecting local repository:', error);
-            this.showError(`Failed to analyze repository: ${error.message}`);
+            console.error('Error stack:', error.stack);
+            
+            // Provide specific error messages based on the error type
+            let errorMessage = `Failed to analyze repository: ${error.message}`;
+            
+            if (error.name === 'AbortError') {
+                errorMessage = 'Repository selection was cancelled by user.';
+                console.log('User cancelled repository selection');
+            } else if (error.message.includes('not a Git repository')) {
+                errorMessage = 'The selected directory is not a Git repository. Please select a directory that contains a .git folder.';
+            } else if (error.message.includes('Permission denied') || error.message.includes('access')) {
+                errorMessage = 'Permission denied. Please ensure you have read access to the selected directory.';
+            } else if (error.name === 'NotSupportedError') {
+                errorMessage = 'Your browser does not support local file access. Please try using a modern browser like Chrome, Edge, or Firefox.';
+            }
+            
+            this.showError(errorMessage);
         } finally {
             this.setAnalyzing(false);
         }

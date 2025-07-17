@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Repository Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .status.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+        }
+        .status.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .status.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        #debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Local Repository Selection Test</h1>
+    
+    <div id="environment-info">
+        <h3>Environment Information</h3>
+        <p><strong>Protocol:</strong> <span id="protocol"></span></p>
+        <p><strong>Hostname:</strong> <span id="hostname"></span></p>
+        <p><strong>Environment:</strong> <span id="environment"></span></p>
+        <p><strong>File System Access API:</strong> <span id="file-api"></span></p>
+    </div>
+
+    <div>
+        <button id="test-local-repo" class="btn">Test Local Repository Selection</button>
+        <button id="test-fallback" class="btn">Test Fallback Method</button>
+        <button id="clear-log" class="btn">Clear Log</button>
+    </div>
+
+    <div id="status-container"></div>
+
+    <div>
+        <h3>Debug Log</h3>
+        <div id="debug-info"></div>
+    </div>
+
+    <script>
+        // Set up environment
+        const isLocal = window.location.protocol === 'file:' || 
+                       window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1' ||
+                       window.location.hostname === '';
+        
+        const isGitHubPages = window.location.hostname.includes('github.io');
+        window.APP_ENVIRONMENT = isLocal ? 'offline' : (isGitHubPages ? 'github-pages' : 'online');
+
+        // Update environment info
+        document.getElementById('protocol').textContent = window.location.protocol;
+        document.getElementById('hostname').textContent = window.location.hostname || '(empty)';
+        document.getElementById('environment').textContent = window.APP_ENVIRONMENT;
+        document.getElementById('file-api').textContent = 'showDirectoryPicker' in window ? 'Available' : 'Not Available';
+
+        // Debug logging
+        function debugLog(message) {
+            const debugInfo = document.getElementById('debug-info');
+            const timestamp = new Date().toLocaleTimeString();
+            debugInfo.textContent += `[${timestamp}] ${message}\n`;
+            debugInfo.scrollTop = debugInfo.scrollHeight;
+            console.log(message);
+        }
+
+        function showStatus(message, type = 'info') {
+            const container = document.getElementById('status-container');
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            container.appendChild(statusDiv);
+            debugLog(`Status (${type}): ${message}`);
+        }
+
+        function clearStatus() {
+            document.getElementById('status-container').innerHTML = '';
+        }
+
+        // Test File System Access API
+        async function testModernAPI() {
+            try {
+                debugLog('Testing File System Access API...');
+                
+                if (!('showDirectoryPicker' in window)) {
+                    throw new Error('File System Access API not available');
+                }
+
+                const dirHandle = await window.showDirectoryPicker({
+                    mode: 'read',
+                    startIn: 'documents'
+                });
+
+                debugLog(`Selected directory: ${dirHandle.name}`);
+                showStatus(`Successfully selected directory: ${dirHandle.name}`, 'success');
+
+                // Check if it's a Git repository
+                try {
+                    const gitDirHandle = await dirHandle.getDirectoryHandle('.git');
+                    debugLog('Git directory found!');
+                    showStatus('✓ Git repository detected', 'success');
+                } catch (error) {
+                    debugLog('No .git directory found');
+                    showStatus('⚠ Not a Git repository (no .git directory)', 'error');
+                }
+
+            } catch (error) {
+                debugLog(`Error with modern API: ${error.message}`);
+                if (error.name === 'AbortError') {
+                    showStatus('User cancelled directory selection', 'info');
+                } else {
+                    showStatus(`Error: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // Test fallback method
+        async function testFallbackAPI() {
+            try {
+                debugLog('Testing fallback directory selection...');
+                
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.webkitdirectory = true;
+                input.directory = true;
+                input.multiple = true;
+
+                debugLog('Created input element with webkitdirectory');
+
+                const files = await new Promise((resolve, reject) => {
+                    input.onchange = (event) => {
+                        const files = event.target.files;
+                        debugLog(`Selected ${files.length} files`);
+                        resolve(files);
+                    };
+
+                    input.onclick = () => {
+                        input.value = '';
+                    };
+
+                    setTimeout(() => {
+                        reject(new Error('User did not select any files within 30 seconds'));
+                    }, 30000);
+
+                    input.click();
+                });
+
+                if (files.length === 0) {
+                    showStatus('No files selected', 'info');
+                    return;
+                }
+
+                debugLog(`Processing ${files.length} files...`);
+                
+                // Check for Git files
+                const gitFiles = Array.from(files).filter(file => 
+                    file.webkitRelativePath.includes('.git/')
+                );
+
+                if (gitFiles.length > 0) {
+                    debugLog(`Found ${gitFiles.length} Git files`);
+                    showStatus(`✓ Git repository detected (${gitFiles.length} .git files)`, 'success');
+                } else {
+                    debugLog('No Git files found');
+                    showStatus('⚠ Not a Git repository (no .git files)', 'error');
+                }
+
+            } catch (error) {
+                debugLog(`Error with fallback API: ${error.message}`);
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('test-local-repo').addEventListener('click', testModernAPI);
+        document.getElementById('test-fallback').addEventListener('click', testFallbackAPI);
+        document.getElementById('clear-log').addEventListener('click', () => {
+            document.getElementById('debug-info').textContent = '';
+            clearStatus();
+        });
+
+        // Initial log
+        debugLog('Test page loaded successfully');
+        debugLog(`Environment: ${window.APP_ENVIRONMENT}`);
+        debugLog(`File System Access API: ${'showDirectoryPicker' in window ? 'Available' : 'Not Available'}`);
+    </script>
+</body>
+</html>
