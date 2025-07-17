@@ -175,7 +175,10 @@ Each version entry includes:
 - **Security** - Vulnerability fixes
 
 ### Release Links
-[Unreleased]: https://github.com/KCoderVA/CommitLog-ProductivityAnalyzer/compare/v0.1.12...HEAD
+[Unreleased]: https://github.com/KCoderVA/CommitLog-ProductivityAnalyzer/compare/v0.1.15...HEAD
+[0.1.15]: https://github.com/KCoderVA/CommitLog-ProductivityAnalyzer/compare/v0.1.14...v0.1.15
+[0.1.14]: https://github.com/KCoderVA/CommitLog-ProductivityAnalyzer/compare/v0.1.13...v0.1.14
+[0.1.13]: https://github.com/KCoderVA/CommitLog-ProductivityAnalyzer/compare/v0.1.12...v0.1.13
 [0.1.12]: https://github.com/KCoderVA/CommitLog-ProductivityAnalyzer/compare/v0.1.0...v0.1.12
 [0.1.0]: https://github.com/KCoderVA/CommitLog-ProductivityAnalyzer/releases/tag/v0.1.0
 

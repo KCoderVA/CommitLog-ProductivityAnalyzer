@@ -1,7 +1,7 @@
 # Git/GitHub Commit Log Productivity Analyzer
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/Version-0.1.12-green.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-0.1.15-green.svg)](./CHANGELOG.md)
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Demo-brightgreen.svg)](https://kcoderva.github.io/CommitLog-ProductivityAnalyzer/)
 [![Repository](https://img.shields.io/badge/GitHub-Repository-black.svg)](https://github.com/KCoderVA/CommitLog-ProductivityAnalyzer)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-yellow.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
@@ -24,7 +24,9 @@ A comprehensive, unified dashboard for analyzing Git repository commit logs and 
 ### 🔍 **Repository Analysis**
 - **Local Git Repositories**: Direct analysis of local `.git` folders (offline mode)
 - **GitHub Repositories**: Remote analysis via GitHub API (online/offline modes)
+- **Enhanced Git Log Parsing**: Accurate statistics from Git log files with `--stat` output
 - **Automatic Detection**: Smart environment detection for seamless operation
+- **Real Statistics**: Precise file changes, additions, and deletions matching `git log --stat` output
 
 ### 📊 **Productivity Metrics**
 - Commit frequency and patterns analysis
