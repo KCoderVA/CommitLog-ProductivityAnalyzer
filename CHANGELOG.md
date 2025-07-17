@@ -8,7 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Apache License 2.0 headers to all source code files
+- LICENSE file with full Apache 2.0 license text
+
 ### Changed
+- Project license from MIT to Apache License 2.0
+- Updated README.md with Apache 2.0 license information
+- Added copyright notices to all major source files
+
 ### Deprecated
 ### Removed
 ### Fixed
