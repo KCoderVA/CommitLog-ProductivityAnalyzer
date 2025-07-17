@@ -1,5 +1,9 @@
 # Git/GitHub Commit Log Productivity Analyzer - .gitignore
 # Copyright 2025 KCoderVA - Apache License 2.0
+#
+# DEVELOPER RULE: Always add temporary files created during development,
+# migration, testing, or AI assistance to the temporary files section.
+# Use descriptive patterns that cover current and future scenarios.
 
 # === Dependencies ===
 node_modules/
@@ -59,6 +63,43 @@ Desktop.ini
 *.temp
 *~
 
+# === Development and Migration Temporary Files ===
+# Branch migration and development logs
+branch-migration-log.txt
+migration-*.txt
+migration-*.log
+*-migration.txt
+*-migration.log
+
+# Backup and temporary files created during development
+*.backup
+*.bak
+*.orig
+*.swp
+*.swo
+
+# Development notes and scratch files
+dev-notes*.txt
+scratch*.txt
+temp-*.txt
+debug*.txt
+test*.log
+
+# AI assistant and development temporary outputs
+ai-*.txt
+copilot-*.txt
+assistant-*.log
+workspace-*.txt
+
+# General temporary patterns for future use
+tmp-*
+temp-*
+scratch-*
+debug-*
+migration-*
+backup-*
+dev-*
+
 # === Cache Directories ===
 .cache/
 .npm
@@ -86,8 +127,7 @@ test-results/
 screenshots/
 
 # Development artifacts
-*.bak
-*.orig
+# (Moved to temporary files section above)
 
 # GitHub Pages build (if using Jekyll)
 _site/
