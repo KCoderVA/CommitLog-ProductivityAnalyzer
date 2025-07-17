@@ -23,7 +23,7 @@ const OfflineConfig = {
     // Application settings
     app: {
         name: 'Git Commit Productivity Analyzer',
-        version: '0.1.12',
+        version: '0.1.13',
         environment: 'offline',
         debug: false
     },

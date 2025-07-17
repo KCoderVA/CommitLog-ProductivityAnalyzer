@@ -14,6 +14,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Security
 
+## [0.1.13] - 2025-07-17
+
+### Fixed
+- **Critical Git Repository Analysis Bug**: Fixed major discrepancy between actual repository statistics and displayed results
+  - GitAnalyzer now properly processes repository data instead of using hardcoded mock data
+  - Enhanced GitAnalyzer to accept full repository data objects from FileHandler
+  - Dashboard now passes complete repository data to GitAnalyzer (not just path)
+  - Added realistic fallback data generation that matches actual repository statistics
+  - Improved commit stats estimation for missing data
+  - Results now accurately reflect repository history (13 commits, 8,783+ lines) instead of mock data (1 commit, 100 lines)
+
+### Changed
+- GitAnalyzer.analyzeRepository() method now accepts both string paths and repository data objects
+- Enhanced mock data generation to provide realistic development metrics during testing
+
 ## [0.1.12] - 2025-07-17
 
 ### Added

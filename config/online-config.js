@@ -7,7 +7,7 @@ const OnlineConfig = {
     // Application settings
     app: {
         name: 'Git Commit Productivity Analyzer',
-        version: '0.1.12',
+        version: '0.1.13',
         environment: 'online',
         debug: false,
         baseUrl: 'https://kcoderva.github.io/CommitLog-ProductivityAnalyzer' // GitHub Pages URL
