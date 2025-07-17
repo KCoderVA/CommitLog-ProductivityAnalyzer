@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Enhanced Git Log Parsing</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #cce7ff; border-color: #b8deff; }
+        pre {
+            background: #f1f3f4;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Enhanced Git Log Parsing Test</h1>
+        <p>This page tests the new Git log parsing functionality that extracts accurate commit statistics.</p>
+        
+        <div class="test-section info">
+            <h3>📋 Setup Instructions</h3>
+            <p>Before testing, make sure you have generated a Git log file:</p>
+            <pre>git log --stat --max-count=5 --pretty=fuller > git-log-with-stats.txt</pre>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔧 Test Controls</h3>
+            <button onclick="testFileAvailability()">1. Check Git Log File</button>
+            <button onclick="testParsingLogic()">2. Test Parsing Logic</button>
+            <button onclick="testFullIntegration()">3. Full Integration Test</button>
+            <button onclick="clearResults()">Clear Results</button>
+        </div>
+        
+        <div id="results" class="results"></div>
+    </div>
+
+    <!-- Load the FileHandler class -->
+    <script src="src/js/utils/file-handler.js"></script>
+
+    <script>
+        let results = document.getElementById('results');
+        
+        function addResult(title, content, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-section ${type}`;
+            div.innerHTML = `<h3>${title}</h3>${content}`;
+            results.appendChild(div);
+        }
+        
+        function clearResults() {
+            results.innerHTML = '';
+        }
+        
+        async function testFileAvailability() {
+            try {
+                const response = await fetch('git-log-with-stats.txt');
+                if (response.ok) {
+                    const content = await response.text();
+                    const lines = content.split('\n').length;
+                    const size = content.length;
+                    addResult('✅ Git Log File Check', 
+                        `<p>Git log file found and accessible!</p>
+                         <p><strong>Size:</strong> ${size.toLocaleString()} characters</p>
+                         <p><strong>Lines:</strong> ${lines.toLocaleString()}</p>
+                         <details><summary>First 500 characters:</summary><pre>${content.substring(0, 500)}...</pre></details>`, 
+                        'success');
+                } else {
+                    addResult('❌ Git Log File Check', 
+                        `<p>Git log file not found (HTTP ${response.status})</p>
+                         <p>Please run: <code>git log --stat --max-count=5 --pretty=fuller > git-log-with-stats.txt</code></p>`, 
+                        'error');
+                }
+            } catch (error) {
+                addResult('❌ Git Log File Check', 
+                    `<p>Error accessing Git log file: ${error.message}</p>`, 
+                    'error');
+            }
+        }
+        
+        async function testParsingLogic() {
+            try {
+                if (!window.FileHandler) {
+                    addResult('❌ Parsing Logic Test', '<p>FileHandler class not available</p>', 'error');
+                    return;
+                }
+                
+                const fileHandler = new FileHandler();
+                
+                // Test with sample Git log content
+                const sampleGitLog = `commit a1b2c3d4e5f6789012345678901234567890abcd
+Author:     Test User <test@example.com>
+AuthorDate: Thu Jul 17 16:56:50 2025 -0400
+Commit:     Test User <test@example.com>
+CommitDate: Thu Jul 17 16:56:50 2025 -0400
+
+    feat: Add new feature
+    
+    This is a test commit with multiple paragraphs
+    of commit message content.
+
+ src/test.js | 45 +++++++++++++++++++++++++++++++++++++++++++++
+ README.md   |  8 ++++++++
+ 2 files changed, 53 insertions(+)`;
+
+                // Test detection
+                const hasStats = fileHandler.looksLikeGitLogWithStats(sampleGitLog);
+                
+                if (hasStats) {
+                    // Test parsing
+                    const commits = fileHandler.parseGitLogWithStats(sampleGitLog);
+                    
+                    if (commits && commits.length > 0) {
+                        const commit = commits[0];
+                        addResult('✅ Parsing Logic Test', 
+                            `<p>Successfully parsed Git log content!</p>
+                             <p><strong>Detected format:</strong> Git log with stats ✅</p>
+                             <p><strong>Commits parsed:</strong> ${commits.length}</p>
+                             <p><strong>Sample commit:</strong></p>
+                             <pre>${JSON.stringify(commit, null, 2)}</pre>`, 
+                            'success');
+                    } else {
+                        addResult('❌ Parsing Logic Test', '<p>Parsing returned no commits</p>', 'error');
+                    }
+                } else {
+                    addResult('❌ Parsing Logic Test', '<p>Failed to detect Git log format</p>', 'error');
+                }
+                
+            } catch (error) {
+                addResult('❌ Parsing Logic Test', 
+                    `<p>Error in parsing logic: ${error.message}</p>
+                     <pre>${error.stack}</pre>`, 
+                    'error');
+            }
+        }
+        
+        async function testFullIntegration() {
+            try {
+                const response = await fetch('git-log-with-stats.txt');
+                if (!response.ok) {
+                    addResult('❌ Integration Test', '<p>Git log file not available for testing</p>', 'error');
+                    return;
+                }
+                
+                const content = await response.text();
+                const fileHandler = new FileHandler();
+                
+                // Test detection
+                const hasStats = fileHandler.looksLikeGitLogWithStats(content);
+                
+                if (!hasStats) {
+                    addResult('❌ Integration Test', '<p>Real Git log file not recognized as stats format</p>', 'error');
+                    return;
+                }
+                
+                // Test parsing
+                const commits = fileHandler.parseGitLogWithStats(content);
+                
+                if (!commits || commits.length === 0) {
+                    addResult('❌ Integration Test', '<p>No commits parsed from real Git log file</p>', 'error');
+                    return;
+                }
+                
+                // Analyze results
+                const totalAdditions = commits.reduce((sum, c) => sum + (c.stats?.additions || 0), 0);
+                const totalDeletions = commits.reduce((sum, c) => sum + (c.stats?.deletions || 0), 0);
+                const totalFiles = commits.reduce((sum, c) => sum + (c.stats?.filesChanged || 0), 0);
+                
+                addResult('✅ Full Integration Test', 
+                    `<p>Successfully parsed real Git log data!</p>
+                     <p><strong>Total Commits:</strong> ${commits.length}</p>
+                     <p><strong>Total File Changes:</strong> ${totalFiles}</p>
+                     <p><strong>Total Additions:</strong> +${totalAdditions} lines</p>
+                     <p><strong>Total Deletions:</strong> -${totalDeletions} lines</p>
+                     <p><strong>Latest commit:</strong> ${commits[0].message.split('\n')[0]}</p>
+                     <details><summary>All parsed commits:</summary><pre>${JSON.stringify(commits, null, 2)}</pre></details>`, 
+                    'success');
+                
+            } catch (error) {
+                addResult('❌ Integration Test', 
+                    `<p>Error in integration test: ${error.message}</p>
+                     <pre>${error.stack}</pre>`, 
+                    'error');
+            }
+        }
+        
+        // Auto-run basic tests on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            addResult('🚀 Test Page Loaded', 
+                '<p>Enhanced Git log parsing test environment ready!</p>', 
+                'info');
+        });
+    </script>
+</body>
+</html>

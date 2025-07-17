@@ -14,6 +14,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Security
 
+## [0.1.15] - 2025-07-17
+
+### Added
+- **Enhanced Git Log Parsing**: Major FileHandler enhancement for accurate commit statistics
+  - Added `parseGitLogWithStats` method for parsing Git logs with --stat output
+  - Enhanced `processLogFiles` to detect and parse custom Git log files with statistics
+  - Added `looksLikeGitLogWithStats` method to identify Git log format patterns
+  - Added `generateGitLogInstructions` method for user guidance
+  - New "Test Enhanced Git Log Parsing" button in UI for validation
+- **Comprehensive Documentation**: Added detailed Git analysis enhancement guide
+  - Step-by-step instructions for generating Git log files with statistics
+  - File format examples for both --stat and --numstat formats
+  - Troubleshooting guide and performance optimization tips
+- **Testing Infrastructure**: Created dedicated test page for Git log parsing validation
+  - Real-time testing of file availability, parsing logic, and full integration
+  - Visual feedback and detailed test results display
+
+### Enhanced
+- **Accurate Statistics Extraction**: Move beyond reflog parsing to real Git statistics
+  - Precise file change tracking instead of estimated values
+  - Real commit statistics matching `git log --stat` terminal output
+  - Enhanced productivity metrics based on actual code changes
+- **FileHandler Capabilities**: Upgraded to support multiple log file formats
+  - Automatic detection of Git log format with statistics
+  - Support for both --stat and --numstat output formats
+  - Deduplication and chronological sorting of commits
+- **User Experience**: Seamless integration with existing workflow
+  - Clear instructions for generating required log files
+  - Automatic fallback to reflog parsing when statistics unavailable
+  - Enhanced error messages and user guidance
+
+### Technical Improvements
+- **Multi-Format Git Log Support**: Handles various Git log output formats
+- **Performance Optimization**: Efficient parsing of large Git log files
+- **Error Handling**: Comprehensive error detection and user feedback
+- **CSS Enhancements**: Added styling for instruction blocks and code samples
+
 ## [0.1.14] - 2025-07-17
 
 ### Added
