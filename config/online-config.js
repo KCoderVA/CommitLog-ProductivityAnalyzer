@@ -10,7 +10,7 @@ const OnlineConfig = {
         version: '1.0.0',
         environment: 'online',
         debug: false,
-        baseUrl: 'https://kcoderva.github.io' // Update with your actual GitHub Pages URL
+        baseUrl: 'https://kcoderva.github.io/CommitLog-ProductivityAnalyzer' // GitHub Pages URL
     },
 
     // GitHub API settings
