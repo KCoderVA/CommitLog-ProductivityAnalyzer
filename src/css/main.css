@@ -239,6 +239,17 @@ main {
     border-left: 4px solid #f44336;
 }
 
+.error-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.error-details {
+    font-size: 0.9rem;
+    color: #8c1919;
+    line-height: 1.5;
+}
+
 .success-message {
     background-color: #e8f5e8;
     color: #2e7d32;

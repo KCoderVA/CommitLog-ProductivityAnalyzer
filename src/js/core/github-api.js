@@ -40,7 +40,7 @@ class GitHubAPI {
             const response = await fetch(`${this.baseURL}/repos/${owner}/${repo}`);
             
             if (!response.ok) {
-                throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+                await this.handleAPIError(response, 'fetch repository information');
             }
 
             this.updateRateLimit(response.headers);
@@ -94,7 +94,7 @@ class GitHubAPI {
             const response = await fetch(`${this.baseURL}/repos/${owner}/${repo}/commits?${params}`);
             
             if (!response.ok) {
-                throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+                await this.handleAPIError(response, 'fetch commits');
             }
 
             this.updateRateLimit(response.headers);
@@ -131,7 +131,7 @@ class GitHubAPI {
             const response = await fetch(`${this.baseURL}/repos/${owner}/${repo}/commits/${sha}`);
             
             if (!response.ok) {
-                throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+                await this.handleAPIError(response, 'fetch commit details');
             }
 
             this.updateRateLimit(response.headers);
@@ -243,6 +243,65 @@ class GitHubAPI {
             console.error('Error checking rate limit:', error);
             return null;
         }
+    }
+
+    /**
+     * Handles GitHub API errors with detailed information
+     * @private
+     * @param {Response} response - Failed response object
+     * @param {string} operation - Operation that failed
+     */
+    async handleAPIError(response, operation) {
+        this.updateRateLimit(response.headers);
+        
+        let errorMessage = `GitHub API error: ${response.status}`;
+        let detailedMessage = '';
+
+        // Try to get detailed error from response body
+        try {
+            const errorData = await response.json();
+            if (errorData.message) {
+                detailedMessage = errorData.message;
+            }
+        } catch (e) {
+            // If response body isn't JSON, use status text
+            detailedMessage = response.statusText;
+        }
+
+        switch (response.status) {
+            case 403:
+                if (this.rateLimitRemaining === 0) {
+                    const resetTime = this.rateLimitReset ? this.rateLimitReset.toLocaleTimeString() : 'unknown';
+                    errorMessage = `GitHub API rate limit exceeded. Rate limit resets at ${resetTime}.`;
+                    detailedMessage = `You've reached the GitHub API rate limit (60 requests per hour for unauthenticated requests). Please wait until ${resetTime} before trying again, or try with a smaller repository.`;
+                } else {
+                    errorMessage = `Access forbidden (403). ${detailedMessage}`;
+                    detailedMessage = `The repository may be private, or you may need authentication to access it. GitHub allows 60 unauthenticated requests per hour.`;
+                }
+                break;
+            case 404:
+                errorMessage = `Repository not found (404)`;
+                detailedMessage = `The repository doesn't exist or is private. Please check the repository URL and ensure it's a public repository.`;
+                break;
+            case 401:
+                errorMessage = `Authentication required (401)`;
+                detailedMessage = `This repository requires authentication. The analyzer currently only supports public repositories.`;
+                break;
+            default:
+                errorMessage = `GitHub API error: ${response.status} ${response.statusText}`;
+                detailedMessage = detailedMessage || `Failed to ${operation}`;
+        }
+
+        // Log detailed information for debugging
+        console.error(`GitHub API Error (${operation}):`, {
+            status: response.status,
+            statusText: response.statusText,
+            rateLimitRemaining: this.rateLimitRemaining,
+            rateLimitReset: this.rateLimitReset,
+            detailedMessage: detailedMessage
+        });
+
+        throw new Error(`${errorMessage}\n\n${detailedMessage}`);
     }
 
     /**

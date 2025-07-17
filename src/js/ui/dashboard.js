@@ -505,7 +505,14 @@ class Dashboard {
         const detailsContent = document.getElementById('commit-details');
         if (!detailsContent) return;
 
-        const commitsHtml = commits.slice(0, 50).map((commit, index) => `
+        // Sort commits by date (newest first)
+        const sortedCommits = [...commits].sort((a, b) => {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            return dateB - dateA; // Descending order (newest first)
+        });
+
+        const commitsHtml = sortedCommits.slice(0, 50).map((commit, index) => `
             <div class="commit-item" data-commit-index="${index}">
                 <div class="commit-header" onclick="this.parentElement.classList.toggle('expanded')">
                     <span class="commit-sha">${commit.shortSha}</span>
@@ -563,8 +570,8 @@ class Dashboard {
 
         detailsContent.innerHTML = `
             <div class="commits-header">
-                <h4>Recent Commits (${Math.min(commits.length, 50)} of ${commits.length})</h4>
-                <p class="commits-help">Click on any commit to view full details</p>
+                <h4>Recent Commits (${Math.min(sortedCommits.length, 50)} of ${sortedCommits.length})</h4>
+                <p class="commits-help">Click on any commit to view full details • Sorted by date (newest first)</p>
             </div>
             <div class="commits-list">
                 ${commitsHtml}
@@ -985,7 +992,25 @@ class Dashboard {
         
         const errorDiv = document.createElement('div');
         errorDiv.className = 'error-message';
-        errorDiv.textContent = message;
+        
+        // Handle multi-line messages by splitting on newlines
+        const lines = message.split('\n').filter(line => line.trim());
+        if (lines.length > 1) {
+            // Create a formatted error with title and details
+            const title = document.createElement('div');
+            title.className = 'error-title';
+            title.textContent = lines[0];
+            errorDiv.appendChild(title);
+            
+            if (lines.length > 1) {
+                const details = document.createElement('div');
+                details.className = 'error-details';
+                details.textContent = lines.slice(1).join(' ');
+                errorDiv.appendChild(details);
+            }
+        } else {
+            errorDiv.textContent = message;
+        }
         
         const repoSection = document.getElementById('repo-selection');
         if (repoSection) {
