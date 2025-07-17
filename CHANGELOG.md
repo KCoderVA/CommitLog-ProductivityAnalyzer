@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 ### Removed
+- `Commit_Productivity_Dashboard.html` - Removed obsolete offline-specific HTML file in favor of unified `index.html` approach
 ### Fixed
 ### Security
 
@@ -26,7 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial project structure with modular JavaScript architecture
 - Unified dashboard with dynamic environment detection (`index.html`)
-- Offline-specific HTML dashboard (`Commit_Productivity_Dashboard.html`)
 - Core functionality modules:
   - Git analyzer for local repository processing
   - GitHub API integration for remote repository analysis
