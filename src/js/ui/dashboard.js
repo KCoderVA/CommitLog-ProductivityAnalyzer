@@ -306,10 +306,35 @@ class Dashboard {
     displayResults(data) {
         console.log('Displaying results...');
         
+        // Store original data for filtering
+        this.originalData = data;
+        this.currentData = data;
+        
+        // Collapse repository selection section
+        this.collapseRepositorySelection(data.repository);
+        
+        // Show date filter section
+        this.showSection('date-filter-section');
+        this.setupDateFilters();
+        
         // Show the analysis sections
         this.showSection('summary-analysis');
         this.showSection('detailed-history');
         
+        // Display results with current filter (initially all data)
+        this.displayFilteredResults(data);
+        
+        // Scroll to date filter section
+        document.getElementById('date-filter-section').scrollIntoView({ 
+            behavior: 'smooth' 
+        });
+    }
+
+    /**
+     * Displays filtered results based on current date filter
+     * @param {Object} data - Filtered repository data
+     */
+    displayFilteredResults(data) {
         // Display summary
         this.displaySummary(data.summary, data.repository);
         
@@ -525,6 +550,234 @@ class Dashboard {
         if (analyzeBtn) {
             analyzeBtn.textContent = analyzing ? 'Analyzing...' : 'Analyze GitHub Repository';
         }
+    }
+
+    /**
+     * Collapses the repository selection section and shows summary
+     * @private
+     * @param {Object} repository - Repository information
+     */
+    collapseRepositorySelection(repository) {
+        const repoSection = document.getElementById('repo-selection');
+        if (repoSection) {
+            repoSection.classList.add('collapsed');
+            
+            // Add summary text
+            const sectionHeader = repoSection.querySelector('.section-header');
+            if (sectionHeader && !sectionHeader.querySelector('.section-summary')) {
+                const summary = document.createElement('div');
+                summary.className = 'section-summary';
+                summary.textContent = `Selected: ${repository.name || 'Repository'} ${repository.url ? '(' + repository.url + ')' : ''}`;
+                sectionHeader.appendChild(summary);
+            }
+        }
+    }
+
+    /**
+     * Sets up date filter event listeners and initializes date inputs
+     * @private
+     */
+    setupDateFilters() {
+        // Set up quick filter buttons
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => this.handleQuickFilter(e.target.dataset.filter));
+        });
+
+        // Set up custom date range
+        const applyButton = document.getElementById('apply-custom-filter');
+        if (applyButton) {
+            applyButton.addEventListener('click', () => this.handleCustomDateFilter());
+        }
+
+        // Set up reset button
+        const resetButton = document.getElementById('reset-filters');
+        if (resetButton) {
+            resetButton.addEventListener('click', () => this.resetFilters());
+        }
+
+        // Initialize date inputs with repository date range
+        this.initializeDateInputs();
+    }
+
+    /**
+     * Initializes date inputs with repository's commit date range
+     * @private
+     */
+    initializeDateInputs() {
+        if (!this.originalData || !this.originalData.commits || this.originalData.commits.length === 0) {
+            return;
+        }
+
+        const commits = this.originalData.commits;
+        const dates = commits.map(commit => new Date(commit.date || commit.timestamp)).filter(date => !isNaN(date));
+        
+        if (dates.length === 0) return;
+
+        const minDate = new Date(Math.min(...dates));
+        const maxDate = new Date(Math.max(...dates));
+
+        const startInput = document.getElementById('start-date');
+        const endInput = document.getElementById('end-date');
+
+        if (startInput && endInput) {
+            startInput.value = minDate.toISOString().split('T')[0];
+            startInput.min = minDate.toISOString().split('T')[0];
+            startInput.max = maxDate.toISOString().split('T')[0];
+            
+            endInput.value = maxDate.toISOString().split('T')[0];
+            endInput.min = minDate.toISOString().split('T')[0];
+            endInput.max = maxDate.toISOString().split('T')[0];
+        }
+    }
+
+    /**
+     * Handles quick filter selection
+     * @private
+     * @param {string} filterType - Filter type (all, 7days, 30days, etc.)
+     */
+    handleQuickFilter(filterType) {
+        // Update active button
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`[data-filter="${filterType}"]`).classList.add('active');
+
+        // Calculate date range
+        const now = new Date();
+        let startDate = null;
+        
+        switch (filterType) {
+            case '7days':
+                startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                break;
+            case '30days':
+                startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                break;
+            case '90days':
+                startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+                break;
+            case 'year':
+                startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+                break;
+            case 'all':
+            default:
+                startDate = null;
+                break;
+        }
+
+        this.applyDateFilter(startDate, null);
+    }
+
+    /**
+     * Handles custom date range filter
+     * @private
+     */
+    handleCustomDateFilter() {
+        const startInput = document.getElementById('start-date');
+        const endInput = document.getElementById('end-date');
+
+        if (!startInput.value || !endInput.value) {
+            alert('Please select both start and end dates');
+            return;
+        }
+
+        const startDate = new Date(startInput.value);
+        const endDate = new Date(endInput.value + 'T23:59:59'); // Include full end day
+
+        if (startDate > endDate) {
+            alert('Start date must be before end date');
+            return;
+        }
+
+        // Update active button
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+
+        this.applyDateFilter(startDate, endDate);
+    }
+
+    /**
+     * Applies date filter to commit data
+     * @private
+     * @param {Date|null} startDate - Start date filter
+     * @param {Date|null} endDate - End date filter
+     */
+    applyDateFilter(startDate, endDate) {
+        if (!this.originalData) return;
+
+        let filteredCommits = [...this.originalData.commits];
+
+        // Apply date filtering
+        if (startDate || endDate) {
+            filteredCommits = filteredCommits.filter(commit => {
+                const commitDate = new Date(commit.date || commit.timestamp);
+                if (isNaN(commitDate)) return false;
+
+                if (startDate && commitDate < startDate) return false;
+                if (endDate && commitDate > endDate) return false;
+                return true;
+            });
+        }
+
+        // Reprocess data with filtered commits
+        const filteredData = {
+            ...this.originalData,
+            commits: filteredCommits
+        };
+
+        // Recalculate summary with filtered data
+        if (this.dataProcessor) {
+            filteredData.summary = this.dataProcessor.calculateSummary(filteredCommits, this.originalData.repository);
+        }
+
+        this.currentData = filteredData;
+
+        // Update status
+        this.updateFilterStatus(startDate, endDate, filteredCommits.length);
+
+        // Refresh display
+        this.displayFilteredResults(filteredData);
+    }
+
+    /**
+     * Updates filter status display
+     * @private
+     * @param {Date|null} startDate - Start date
+     * @param {Date|null} endDate - End date  
+     * @param {number} commitCount - Number of commits after filtering
+     */
+    updateFilterStatus(startDate, endDate, commitCount) {
+        const statusText = document.getElementById('filter-status-text');
+        const resetButton = document.getElementById('reset-filters');
+
+        if (!statusText) return;
+
+        let statusMessage;
+        if (!startDate && !endDate) {
+            statusMessage = `Showing all ${commitCount.toLocaleString()} commits`;
+            resetButton.style.display = 'none';
+        } else {
+            const startStr = startDate ? startDate.toLocaleDateString() : 'beginning';
+            const endStr = endDate ? endDate.toLocaleDateString() : 'now';
+            statusMessage = `Showing ${commitCount.toLocaleString()} commits from ${startStr} to ${endStr}`;
+            resetButton.style.display = 'inline-block';
+        }
+
+        statusText.textContent = statusMessage;
+    }
+
+    /**
+     * Resets all filters to show all commits
+     * @private
+     */
+    resetFilters() {
+        // Reset active button
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector('[data-filter="all"]').classList.add('active');
+
+        // Reset custom date inputs
+        this.initializeDateInputs();
+
+        // Apply no filter (show all)
+        this.applyDateFilter(null, null);
     }
 
     /**

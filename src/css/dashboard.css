@@ -498,3 +498,170 @@
         font-size: 0.8rem;
     }
 }
+
+/* Date Filter Section Styles */
+.filter-controls {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #e1e8ed;
+}
+
+.filter-group {
+    margin-bottom: 1.5rem;
+}
+
+.filter-group:last-child {
+    margin-bottom: 0;
+}
+
+.filter-group h4 {
+    color: #2c3e50;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* Quick Filter Buttons */
+.quick-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.filter-btn {
+    background: white;
+    border: 2px solid #e1e8ed;
+    color: #495057;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+    border-color: #3498db;
+    color: #3498db;
+}
+
+.filter-btn.active {
+    background: #3498db;
+    border-color: #3498db;
+    color: white;
+}
+
+/* Custom Date Range */
+.custom-date-range {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 1rem;
+}
+
+.date-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.date-input-group label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #495057;
+}
+
+.date-input {
+    padding: 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background: white;
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* Filter Status */
+.filter-status {
+    background: white;
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid #e1e8ed;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.filter-status p {
+    margin: 0;
+    color: #666;
+    font-weight: 500;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid #6c757d;
+    color: #6c757d;
+}
+
+.btn-outline:hover {
+    background: #6c757d;
+    color: white;
+}
+
+/* Collapsed Repository Section */
+.section.collapsed {
+    padding: 1rem 2rem;
+}
+
+.section.collapsed .section-header {
+    margin-bottom: 0.5rem;
+}
+
+.section.collapsed .section-header h2 {
+    font-size: 1.2rem;
+}
+
+.section.collapsed .input-group {
+    display: none;
+}
+
+.section-summary {
+    display: none;
+    color: #666;
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+.section.collapsed .section-summary {
+    display: block;
+}
+
+/* Responsive Design for Filters */
+@media (max-width: 768px) {
+    .quick-filters {
+        flex-direction: column;
+    }
+    
+    .filter-btn {
+        text-align: center;
+    }
+    
+    .custom-date-range {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-status {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

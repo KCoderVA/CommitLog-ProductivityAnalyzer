@@ -96,6 +96,47 @@ limitations under the License.
                 </div>
             </section>
 
+            <!-- Date Filter Section (hidden until repository is selected) -->
+            <section id="date-filter-section" class="section" style="display: none;">
+                <div class="section-header">
+                    <h2>📅 Analysis Date Range</h2>
+                    <p class="section-description">Filter commit history by date range to focus your analysis</p>
+                </div>
+                
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <h4>Quick Filters</h4>
+                        <div class="quick-filters">
+                            <button class="filter-btn active" data-filter="all">All Time</button>
+                            <button class="filter-btn" data-filter="7days">Last 7 Days</button>
+                            <button class="filter-btn" data-filter="30days">Last 30 Days</button>
+                            <button class="filter-btn" data-filter="90days">Last 90 Days</button>
+                            <button class="filter-btn" data-filter="year">Last Year</button>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <h4>Custom Date Range</h4>
+                        <div class="custom-date-range">
+                            <div class="date-input-group">
+                                <label for="start-date">From:</label>
+                                <input type="date" id="start-date" class="date-input">
+                            </div>
+                            <div class="date-input-group">
+                                <label for="end-date">To:</label>
+                                <input type="date" id="end-date" class="date-input">
+                            </div>
+                            <button id="apply-custom-filter" class="btn btn-secondary">Apply Filter</button>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-status">
+                        <p id="filter-status-text">Showing all commits</p>
+                        <button id="reset-filters" class="btn btn-outline" style="display: none;">Reset to All Time</button>
+                    </div>
+                </div>
+            </section>
+
             <!-- Summary Analysis Section -->
             <section id="summary-analysis" class="section" style="display: none;">
                 <div class="section-header">

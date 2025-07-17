@@ -52,6 +52,16 @@ class DataProcessor {
     }
 
     /**
+     * Calculates summary metrics for a filtered set of commits
+     * @param {Array} commits - Array of commit objects
+     * @param {Object} repository - Repository information
+     * @returns {Object} Summary metrics
+     */
+    calculateSummary(commits, repository = {}) {
+        return this.calculateProductivityMetrics(commits);
+    }
+
+    /**
      * Calculates comprehensive productivity metrics
      * @param {Array} commits - Array of commit objects
      * @returns {Object} Calculated metrics
