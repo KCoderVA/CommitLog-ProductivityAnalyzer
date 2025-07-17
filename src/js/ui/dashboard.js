@@ -187,7 +187,8 @@ class Dashboard {
             // Process the data using GitAnalyzer if available
             let processedData;
             if (this.gitAnalyzer) {
-                const analysisResult = await this.gitAnalyzer.analyzeRepository(repositoryData.path);
+                // Pass the entire repository data object to GitAnalyzer
+                const analysisResult = await this.gitAnalyzer.analyzeRepository(repositoryData);
                 processedData = this.dataProcessor ? this.dataProcessor.processCommitData(analysisResult.commits, repositoryData) : repositoryData;
             } else if (this.dataProcessor) {
                 // Fallback to direct processing
