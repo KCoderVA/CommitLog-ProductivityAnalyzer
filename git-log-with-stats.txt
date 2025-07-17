@@ -1,0 +1,66 @@
+commit 050f718262da4603b5c35b491e32600be65e32d3
+Author:     Kyle.Coder@VA.gov <103198624+KCoderVA@users.noreply.github.com>
+AuthorDate: Thu Jul 17 16:56:50 2025 -0400
+Commit:     Kyle.Coder@VA.gov <103198624+KCoderVA@users.noreply.github.com>
+CommitDate: Thu Jul 17 16:56:50 2025 -0400
+
+    feat: Enhance GitHub API error handling and rate limit information
+    
+    - Added detailed handleAPIError method with specific messages for 403, 404, 401 errors
+    - Enhanced rate limit handling with reset time information
+    - Improved error messages to explain GitHub API limitations (60 requests/hour)
+    - Updated error display in Dashboard to handle multi-line error messages
+    - Added CSS styles for error title and details structure
+    - Better user guidance for rate limit exceeded and authentication issues
+    
+    This provides clearer feedback when analyzing public repositories hits GitHub's
+    unauthenticated API rate limits, helping users understand the limitations.
+
+ src/css/main.css          | 11 ++++++++
+ src/js/core/github-api.js | 65 ++++++++++++++++++++++++++++++++++++++++++++---
+ src/js/ui/dashboard.js    | 33 +++++++++++++++++++++---
+ 3 files changed, 102 insertions(+), 7 deletions(-)
+
+commit ad4529f74eb50d16205b7c91baefddafe82d7094
+Author:     Kyle.Coder@VA.gov <103198624+KCoderVA@users.noreply.github.com>
+AuthorDate: Thu Jul 17 16:50:10 2025 -0400
+Commit:     Kyle.Coder@VA.gov <103198624+KCoderVA@users.noreply.github.com>
+CommitDate: Thu Jul 17 16:50:10 2025 -0400
+
+    release: Bump version to 0.1.14
+    
+    - Fixed commit message display showing full multi-paragraph content
+    - Added enhanced mock data testing functionality with accurate statistics
+    - Updated version in offline-config.js and online-config.js from 0.1.13 to 0.1.14
+    - Added comprehensive changelog entry documenting UI improvements and testing enhancements
+    - Mock data now accurately represents expected real repository analysis output
+
+ CHANGELOG.md             | 19 +++++++++++++++++++
+ config/offline-config.js |  2 +-
+ config/online-config.js  |  2 +-
+ 3 files changed, 21 insertions(+), 2 deletions(-)
+
+commit 6421f6c3649a1587fd40da7869ab105e77d10db5
+Author:     Kyle.Coder@VA.gov <103198624+KCoderVA@users.noreply.github.com>
+AuthorDate: Thu Jul 17 16:48:59 2025 -0400
+Commit:     Kyle.Coder@VA.gov <103198624+KCoderVA@users.noreply.github.com>
+CommitDate: Thu Jul 17 16:48:59 2025 -0400
+
+    feat: Fix commit message display and add enhanced mock data testing
+    
+    - Fixed DataProcessor to preserve full multi-paragraph commit messages
+    - Enhanced mock data with accurate statistics (371 additions, 61 deletions)
+    - Added 'Load Mock Data' demo button for testing enhanced functionality
+    - Updated GitAnalyzer mock data to include realistic multi-line commit messages
+    - Resolved issue where expandable commit details only showed first line
+    - Mock data now accurately represents expected real repository analysis output
+    
+    This ensures full commit messages are displayed correctly in the UI and
+    provides a testing mechanism for enhanced features until FileHandler
+    can parse full Git statistics from repository objects.
+
+ index.html                    |  7 +++++
+ src/js/core/data-processor.js | 33 +++++++++++++++---------
+ src/js/core/git-analyzer.js   | 47 +++++++++++++++++++++++++++++++--
+ src/js/ui/dashboard.js        | 60 +++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 133 insertions(+), 14 deletions(-)

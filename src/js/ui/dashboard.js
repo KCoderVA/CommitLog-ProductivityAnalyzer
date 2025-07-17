@@ -96,6 +96,12 @@ class Dashboard {
             loadMockDataBtn.addEventListener('click', () => this.loadMockData());
         }
 
+        // Enhanced Git log parsing test button
+        const testGitLogBtn = document.getElementById('test-git-log-parsing');
+        if (testGitLogBtn) {
+            testGitLogBtn.addEventListener('click', () => this.testGitLogParsing());
+        }
+
         // GitHub URL input - allow Enter key
         const githubInput = document.getElementById('github-repo-url');
         if (githubInput) {
@@ -355,6 +361,126 @@ class Dashboard {
         } catch (error) {
             console.error('Error loading mock data:', error);
             this.showError(`Failed to load mock data: ${error.message}`);
+        } finally {
+            this.setAnalyzing(false);
+        }
+    }
+
+    /**
+     * Tests the enhanced Git log parsing functionality with real repository data
+     */
+    async testGitLogParsing() {
+        try {
+            console.log('Testing Git log parsing...');
+            this.setAnalyzing(true);
+            this.showStatus('Testing enhanced Git log parsing...');
+
+            if (!window.FileHandler) {
+                throw new Error('FileHandler not available. Please ensure you are using the offline version.');
+            }
+
+            const fileHandler = new FileHandler();
+
+            // Read the generated Git log file
+            const logFilePath = 'git-log-with-stats.txt';
+            
+            try {
+                // Try to read the Git log file directly
+                const response = await fetch(logFilePath);
+                if (!response.ok) {
+                    throw new Error(`Git log file not found. Please run: git log --stat --max-count=5 --pretty=fuller > ${logFilePath}`);
+                }
+                
+                const gitLogContent = await response.text();
+                console.log('Git log content loaded, length:', gitLogContent.length);
+
+                // Test the parsing methods
+                const hasStats = fileHandler.looksLikeGitLogWithStats(gitLogContent);
+                console.log('Git log has stats format:', hasStats);
+
+                if (!hasStats) {
+                    throw new Error('Git log file does not contain statistics. Please regenerate with --stat flag.');
+                }
+
+                // Parse the commits
+                const commits = fileHandler.parseGitLogWithStats(gitLogContent);
+                console.log('Parsed commits:', commits);
+
+                if (!commits || commits.length === 0) {
+                    throw new Error('No commits could be parsed from the Git log file.');
+                }
+
+                // Create a mock repository data object
+                const repositoryData = {
+                    repository: {
+                        name: 'Test Repository (Enhanced Git Log)',
+                        type: 'local',
+                        path: './git-log-with-stats.txt'
+                    },
+                    commits: commits
+                };
+
+                // Process with GitAnalyzer if available
+                let analysisResult;
+                if (this.gitAnalyzer) {
+                    analysisResult = await this.gitAnalyzer.analyzeRepository(repositoryData);
+                } else {
+                    analysisResult = repositoryData;
+                }
+
+                // Process the data
+                const processedData = this.dataProcessor ? 
+                    this.dataProcessor.processCommitData(analysisResult.commits, analysisResult.repository) : 
+                    {
+                        repository: analysisResult.repository,
+                        commits: analysisResult.commits || [],
+                        summary: {
+                            totalCommits: (analysisResult.commits || []).length,
+                            contributors: new Set((analysisResult.commits || []).map(c => c.author)).size,
+                            totalFiles: (analysisResult.commits || []).reduce((sum, c) => sum + (c.stats?.filesChanged || 0), 0),
+                            totalAdditions: (analysisResult.commits || []).reduce((sum, c) => sum + (c.stats?.additions || 0), 0),
+                            totalDeletions: (analysisResult.commits || []).reduce((sum, c) => sum + (c.stats?.deletions || 0), 0),
+                            netChanges: 0,
+                            averageCommitSize: 0,
+                            productivity: 'Enhanced',
+                            dateRange: { startFormatted: 'Recent', endFormatted: 'Latest', days: 30 },
+                            filteredCommits: analysisResult.commits || [],
+                            filteredSummary: {}
+                        }
+                    };
+
+                console.log('Processed Git log data:', processedData);
+
+                this.currentData = processedData;
+                this.displayResults(processedData);
+                this.hideStatus();
+
+                // Show success message
+                this.showStatus(`✅ Successfully parsed ${commits.length} commits with enhanced statistics!`, false);
+                setTimeout(() => this.hideStatus(), 3000);
+
+            } catch (fetchError) {
+                console.error('Error reading Git log file:', fetchError);
+                
+                // Show instructions for generating the file
+                const instructions = `
+                    <div class="git-log-instructions">
+                        <h4>📋 How to Generate Git Log File</h4>
+                        <p>To test enhanced Git log parsing, first generate a Git log file with statistics:</p>
+                        <div class="code-block">
+                            <code>git log --stat --max-count=5 --pretty=fuller > git-log-with-stats.txt</code>
+                        </div>
+                        <p>Then place the file in your repository root and try again.</p>
+                        <p><small>Note: The file should contain commit statistics (file changes, additions, deletions)</small></p>
+                    </div>
+                `;
+                
+                this.showError(`Git Log File Required\n\n${instructions}`, true);
+            }
+
+        } catch (error) {
+            console.error('Error testing Git log parsing:', error);
+            this.showError(`Failed to test Git log parsing: ${error.message}`);
         } finally {
             this.setAnalyzing(false);
         }

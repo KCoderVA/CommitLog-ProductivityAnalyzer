@@ -232,9 +232,21 @@ class FileHandler {
             }
 
             // Process log files if available
-            const logFiles = Array.from(files).filter(file => 
+            let logFiles = Array.from(files).filter(file => 
                 file.webkitRelativePath.includes('.git/logs/')
             );
+
+            // Also look for custom Git log files in the repository root
+            const customLogFiles = Array.from(files).filter(file => {
+                const name = file.name.toLowerCase();
+                return (name.includes('git-log') || name.includes('commit-log')) && 
+                       (name.endsWith('.txt') || name.endsWith('.log'));
+            });
+
+            if (customLogFiles.length > 0) {
+                console.log('Found custom Git log files:', customLogFiles.map(f => f.name));
+                logFiles = [...logFiles, ...customLogFiles];
+            }
             
             repoInfo.commits = await this.processLogFiles(logFiles);
 
@@ -244,6 +256,37 @@ class FileHandler {
         }
 
         return repoInfo;
+    }
+
+    /**
+     * Generates Git log files with statistics for enhanced analysis
+     * This method provides instructions for creating enhanced Git log files
+     * @param {string} repositoryPath - Path to the Git repository
+     * @returns {Object} Instructions for generating enhanced Git logs
+     */
+    generateGitLogInstructions(repositoryPath) {
+        return {
+            description: "To get full commit statistics, generate enhanced Git log files using these commands:",
+            commands: [
+                {
+                    name: "Full Git Log with Statistics",
+                    command: "git log --stat --pretty=fuller > git-log-with-stats.txt",
+                    description: "Creates a comprehensive log with file change statistics"
+                },
+                {
+                    name: "Detailed Git Log with Patches",
+                    command: "git log --numstat --pretty=format:'commit %H%nAuthor: %an <%ae>%nDate: %ad%nSubject: %s%n%n%b%n' --date=iso > git-log-detailed.txt",
+                    description: "Creates a detailed log with numerical file statistics"
+                },
+                {
+                    name: "Recent Commits with Statistics",
+                    command: "git log --stat --since='6 months ago' --pretty=fuller > recent-commits-with-stats.txt",
+                    description: "Creates a log of recent commits with statistics"
+                }
+            ],
+            usage: "Run these commands in your Git repository, then include the generated files when selecting the repository folder.",
+            fileLocation: "Place the generated .txt files in your repository's root directory before selecting the folder."
+        };
     }
 
     /**
@@ -359,11 +402,26 @@ class FileHandler {
     async processLogFiles(logFiles) {
         const commits = [];
 
+        // Look for different types of Git log files
         for (const logFile of logFiles) {
             try {
                 const content = await this.readFileAsText(logFile);
-                const fileCommits = this.parseRefLog(content);
+                const fileName = logFile.webkitRelativePath || logFile.name;
+                
+                let fileCommits = [];
+                
+                // Check if this might be a Git log with statistics
+                if (this.looksLikeGitLogWithStats(content)) {
+                    console.log('Found Git log with statistics:', fileName);
+                    fileCommits = this.parseGitLogWithStats(content);
+                } else {
+                    // Fall back to reflog parsing
+                    fileCommits = this.parseRefLog(content);
+                }
+                
+                console.log(`Parsed ${fileCommits.length} commits from ${fileName}`);
                 commits.push(...fileCommits);
+                
             } catch (error) {
                 console.warn('Failed to process log file:', logFile.name, error);
             }
@@ -374,7 +432,22 @@ class FileHandler {
             arr.findIndex(c => c.sha === commit.sha) === index
         );
 
+        console.log(`Total unique commits found: ${uniqueCommits.length}`);
         return uniqueCommits.sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+
+    /**
+     * Checks if content looks like Git log with statistics
+     * @private
+     * @param {string} content - File content
+     * @returns {boolean} Whether content appears to be Git log with stats
+     */
+    looksLikeGitLogWithStats(content) {
+        // Look for patterns that indicate Git log with statistics
+        return content.includes('files changed') || 
+               content.includes('insertions(+)') || 
+               content.includes('deletions(-)') ||
+               content.match(/commit [a-f0-9]{40}/);
     }
 
     /**
@@ -412,6 +485,158 @@ class FileHandler {
         }
 
         return commits;
+    }
+
+    /**
+     * Parses Git log with statistics (enhanced format)
+     * @private
+     * @param {string} content - Git log content with stats
+     * @returns {Array} Array of commits with statistics
+     */
+    parseGitLogWithStats(content) {
+        const commits = [];
+        
+        // Split by commit separator (assuming --format with custom separator)
+        const commitBlocks = content.split(/^commit /m).filter(block => block.trim());
+        
+        for (const block of commitBlocks) {
+            try {
+                const commit = this.parseGitLogCommitBlock(block);
+                if (commit) {
+                    commits.push(commit);
+                }
+            } catch (error) {
+                console.warn('Failed to parse commit block:', error);
+            }
+        }
+        
+        return commits;
+    }
+
+    /**
+     * Parses a single Git log commit block with statistics
+     * @private
+     * @param {string} block - Single commit block
+     * @returns {Object|null} Parsed commit object
+     */
+    parseGitLogCommitBlock(block) {
+        const lines = block.trim().split('\n');
+        if (lines.length === 0) return null;
+
+        // Extract commit SHA (first line)
+        const shaMatch = lines[0].match(/^([a-f0-9]{40})/);
+        if (!shaMatch) return null;
+
+        const sha = shaMatch[1];
+        let author = { name: 'Unknown', email: 'unknown@example.com' };
+        let date = new Date().toISOString();
+        let message = '';
+        let stats = { additions: 0, deletions: 0, files: [] };
+
+        // Parse commit metadata and statistics
+        let inMessage = false;
+        let inStats = false;
+        let messageLines = [];
+
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i];
+
+            // Parse author line
+            if (line.startsWith('Author: ')) {
+                const authorMatch = line.match(/^Author: (.+?) <(.+?)>$/);
+                if (authorMatch) {
+                    author = { name: authorMatch[1], email: authorMatch[2] };
+                }
+                continue;
+            }
+
+            // Parse date line
+            if (line.startsWith('Date: ')) {
+                const dateStr = line.replace('Date: ', '').trim();
+                date = new Date(dateStr).toISOString();
+                continue;
+            }
+
+            // Start of commit message
+            if (line === '' && !inMessage && !inStats) {
+                inMessage = true;
+                continue;
+            }
+
+            // Parse commit message
+            if (inMessage && !inStats) {
+                if (line.trim() === '' && messageLines.length > 0) {
+                    // Empty line might indicate end of message, start looking for stats
+                    continue;
+                }
+                if (line.match(/^\s*\d+\s+files?\s+changed/)) {
+                    // Statistics line found
+                    inStats = true;
+                    inMessage = false;
+                    message = messageLines.join('\n').trim();
+                    // Process this stats line
+                    i--; // Reprocess this line as stats
+                    continue;
+                }
+                messageLines.push(line.replace(/^    /, '')); // Remove leading spaces
+                continue;
+            }
+
+            // Parse statistics
+            if (inStats || line.match(/^\s*\d+\s+files?\s+changed/)) {
+                inStats = true;
+                if (!inMessage && messageLines.length > 0) {
+                    message = messageLines.join('\n').trim();
+                }
+
+                // Parse summary line: "X files changed, Y insertions(+), Z deletions(-)"
+                const statsMatch = line.match(/(\d+)\s+files?\s+changed(?:,\s*(\d+)\s+insertions?\(\+\))?(?:,\s*(\d+)\s+deletions?\(-\))?/);
+                if (statsMatch) {
+                    const filesChanged = parseInt(statsMatch[1]) || 0;
+                    const insertions = parseInt(statsMatch[2]) || 0;
+                    const deletions = parseInt(statsMatch[3]) || 0;
+                    
+                    stats.additions = insertions;
+                    stats.deletions = deletions;
+                    // Generate file list (simplified)
+                    stats.files = Array(filesChanged).fill(0).map((_, idx) => `file${idx + 1}`);
+                    continue;
+                }
+
+                // Parse individual file stats: "path/to/file | X ++--"
+                const fileMatch = line.match(/^\s*(.+?)\s*\|\s*(\d+)\s*([+\-]*)/);
+                if (fileMatch) {
+                    const filename = fileMatch[1].trim();
+                    const changes = parseInt(fileMatch[2]) || 0;
+                    const markers = fileMatch[3] || '';
+                    
+                    if (filename && !stats.files.includes(filename)) {
+                        stats.files.push(filename);
+                    }
+                    
+                    // Count + and - markers for more accurate stats
+                    const additions = (markers.match(/\+/g) || []).length;
+                    const deletions = (markers.match(/-/g) || []).length;
+                    
+                    // This is per-file, but for simplicity we'll aggregate
+                    continue;
+                }
+            }
+        }
+
+        // Finalize message if not set
+        if (!message && messageLines.length > 0) {
+            message = messageLines.join('\n').trim();
+        }
+
+        return {
+            sha: sha,
+            shortSha: sha.substring(0, 7),
+            message: message || 'No commit message',
+            author: author,
+            date: date,
+            stats: stats.additions > 0 || stats.deletions > 0 || stats.files.length > 0 ? stats : null
+        };
     }
 
     /**
